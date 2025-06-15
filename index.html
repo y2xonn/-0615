@@ -97,6 +97,8 @@ async function postTweet(topic,prepend=false){
   const el=document.createElement("div");
   el.className="tweet";
   el.innerHTML = `<p class="tweet-user">BLOOMZ AI</p><p class="tweet-content">생성 중...</p><p class="tweet-time">방금</p>`;
+  // 올바르게 고친 버전:
+  el.innerHTML = `<p class="tweet-user">BLOOMZ AI</p><p class="tweet-content">생성 중...</p><p class="tweet-time">방금</p>`;
   prepend?tweets.prepend(el):tweets.appendChild(el);
   const txt=await callBloomz(`${topic}에 대한 자극적인 가짜 뉴스 스타일 문장을 작성해줘. 한국어로.`);
   el.querySelector(".tweet-content").textContent=txt;
