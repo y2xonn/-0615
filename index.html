@@ -5,19 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>편향 피드 체험</title>
   <style>
-    :root {
-      --positive:#d4edda; --negative:#f8d7da; --border:#ccc;
-    }
+    :root{--pos:#d4edda;--neg:#f8d7da;--border:#ccc;--primary:#1d9bf0}
     body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:40px;display:flex;justify-content:center}
     .container{width:100%;max-width:720px}
     h1,h2{margin-bottom:24px}
     select,button{padding:10px;font-size:15px;border:1px solid var(--border);border-radius:6px}
-    button.generate{background:#1d9bf0;color:#fff;border:none;cursor:pointer;margin-left:8px}
+    button.generate{background:var(--primary);color:#fff;border:none;cursor:pointer;margin-left:8px}
     .feed-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px}
     .tag-buttons{margin-top:12px}
     .tag-button{padding:6px 14px;margin-right:8px;border:1px solid var(--border);border-radius:6px;cursor:pointer}
-    .positive{background:var(--positive)!important}
-    .negative{background:var(--negative)!important}
+    .positive{background:var(--pos)!important}
+    .negative{background:var(--neg)!important}
+    .hidden{display:none}
+    .card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:24px;margin-top:32px}
   </style>
 </head>
 <body>
@@ -33,6 +33,16 @@
     <button class="generate" onclick="generateFeed()">피드 생성</button>
 
     <div id="feed-container" style="margin-top:32px"></div>
+    <button id="result-btn" class="generate hidden" onclick="showResult()">결과 보기</button>
+
+    <!-- 결과 카드 -->
+    <div id="summary" class="card hidden">
+      <h2>결과 요약</h2>
+      <p id="actual-ratio"></p>
+      <p id="user-ratio"></p>
+      <h3>필터버블 & 확증편향</h3>
+      <p>필터버블은 알고리즘이 당신에게 익숙한 정보만 보여주는 현상이고, 확증편향은 사람이 자신이 믿는 정보만 받아들이는 경향입니다. 이 두 가지가 만나면 정보 편향이 강화될 수 있어요.</p>
+    </div>
   </div>
 
 <script>
@@ -42,8 +52,10 @@ const FEEDS={
   SNS:{positive:["SNS 캠페인으로 기부금 10억 모금","소통의 창으로 재난 시 생명 구조 도움","SNS로 가족과의 소통 유지","SNS를 통한 정보 공유 활발","긍정 메시지 확산으로 심리적 위안"],negative:["SNS 중독으로 청소년 정신건강 악화","허위 정보 확산, 사회 갈등 심화","SNS상 괴롭힘 증가로 자살률 우려","SNS에 의존한 허위 행복 이미지 확산","SNS 사용 과다로 수면 질 악화"]},
   연예인:{positive:["연예인 A, 국제 시상식 대상 수상","팬미팅 성료, 글로벌 팬 사랑 확인","선행 활동으로 기부 5억 돌파","새 음원 발매 하루 만에 1위","해외 투어 전석 매진"],negative:["연예인 A, 탈세 의혹 파문","과거 발언 논란 재점화","스케줄 파행에 팬들 실망","소속사와 갈등 심화","음주 운전 적발로 활동 중단"]}
 };
-function generateFeed(){const topic=document.getElementById('topic-select').value;const feedData=FEEDS[topic];const container=document.getElementById('feed-container');container.innerHTML='';const total=10;const numPos=Math.floor(Math.random()*(total+1));const numNeg=total-numPos;let pos=[...feedData.positive];let neg=[...feedData.negative];while(pos.length<numPos)pos=[...pos,...feedData.positive];while(neg.length<numNeg)neg=[...neg,...feedData.negative];const mixed=[...pos.slice(0,numPos),...neg.slice(0,numNeg)].sort(()=>Math.random()-.5);mixed.forEach((txt,i)=>{const div=document.createElement('div');div.className='feed-item';const p=document.createElement('p');p.textContent=txt;const btnWrap=document.createElement('div');btnWrap.className='tag-buttons';['긍정','부정'].forEach(l=>{const b=document.createElement('button');b.textContent=l;b.className='tag-button';b.onclick=()=>toggle(div,l==='긍정'? 'positive':'negative');btnWrap.appendChild(b);});div.appendChild(p);div.appendChild(btnWrap);container.appendChild(div);});}
-function toggle(item,state){item.classList.remove('positive','negative');item.classList.add(state);} 
+let numPos=0,numNeg=0,userPos=0,userNeg=0;
+function generateFeed(){const topic=document.getElementById('topic-select').value;const feedData=FEEDS[topic];const container=document.getElementById('feed-container');container.innerHTML='';userPos=userNeg=0;const total=10;numPos=Math.floor(Math.random()*(total+1));numNeg=total-numPos;let pos=[...feedData.positive],neg=[...feedData.negative];while(pos.length<numPos)pos=pos.concat(feedData.positive);while(neg.length<numNeg)neg=neg.concat(feedData.negative);const mixed=[...pos.slice(0,numPos),...neg.slice(0,numNeg)].sort(()=>Math.random()-.5);mixed.forEach((txt,i)=>{const div=document.createElement('div');div.className='feed-item';div.dataset.state='none';const p=document.createElement('p');p.textContent=txt;const btnWrap=document.createElement('div');btnWrap.className='tag-buttons';['긍정','부정'].forEach(l=>{const b=document.createElement('button');b.textContent=l;b.className='tag-button';b.onclick=()=>mark(div,l==='긍정'?'positive':'negative');btnWrap.appendChild(b);});div.appendChild(p);div.appendChild(btnWrap);container.appendChild(div);});document.getElementById('result-btn').classList.remove('hidden');document.getElementById('summary').classList.add('hidden');}
+function mark(div,state){const prev=div.dataset.state;if(prev===state)return;if(prev==='positive')userPos--;if(prev==='negative')userNeg--;if(state==='positive'){userPos++;div.classList.add('positive');div.classList.remove('negative');}else{userNeg++;div.classList.add('negative');div.classList.remove('positive');}div.dataset.state=state;}
+function showResult(){document.getElementById('actual-ratio').textContent=`실제 비율: 긍정 ${numPos} / 부정 ${numNeg}`;document.getElementById('user-ratio').textContent=`당신의 선택: 긍정 ${userPos} / 부정 ${userNeg}`;document.getElementById('summary').classList.remove('hidden');window.scrollTo({top:document.getElementById('summary').offsetTop,behavior:'smooth'});} 
 </script>
 </body>
 </html>
