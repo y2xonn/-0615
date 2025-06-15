@@ -19,10 +19,11 @@
     .hidden{display:none}
     .card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:24px;margin-top:32px}
     .subtext{font-size:13px;color:#666;margin-top:6px}
+    .nav-btn{margin-top:20px;display:block;background:#333;color:#fff;padding:10px 20px;border:none;border-radius:6px;cursor:pointer}
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="main-page">
     <h1>편향 피드 체험</h1>
     <h2>주제를 선택하고 10개의 기사에 긍정/부정 라벨을 달아보세요.</h2>
     <select id="topic-select">
@@ -43,64 +44,25 @@
       <p id="user-ratio"></p>
       <h3>필터버블 & 확증편향</h3>
       <p>필터버블은 알고리즘이 당신에게 익숙한 정보만 보여주는 현상이고, 확증편향은 사람이 자신이 믿는 정보만 받아들이는 경향입니다. 이 두 가지가 만나면 정보 편향이 강화될 수 있어요.</p>
+      <button class="nav-btn" onclick="goToNextPage()">더 알아보기</button>
     </div>
   </div>
 
+  <div class="container hidden" id="explanation-page">
+    <h2>왜 문제인가요?</h2>
+    <p>정보가 나에게 유리한 방향으로만 들어온다면, 세상을 더 좁게 보고 판단할 위험이 있습니다. 이런 편향은 타인을 이해하는 데 장애가 되고, 사회적 분열로 이어질 수 있습니다.</p>
+
+    <h2>어떻게 해결할 수 있을까요?</h2>
+    <ul>
+      <li>다양한 출처에서 뉴스를 읽어보세요.</li>
+      <li>자신과 다른 의견도 열린 마음으로 접근해보세요.</li>
+      <li>알고리즘이 제공하는 콘텐츠만 보지 말고, 직접 검색해보세요.</li>
+      <li>의심 가는 정보는 팩트체크 사이트를 통해 확인하세요.</li>
+    </ul>
+  </div>
+
 <script>
-const FEEDS={
-  환경:{positive:[
-    ["전 세계 탄소 배출 감소, 녹색 전환 가속화","글로벌 친환경 정책으로 탄소 배출량이 빠르게 줄고 있습니다."],
-    ["친환경 기술 투자 증가로 일자리 창출","녹색 산업에 대한 투자가 새로운 일자리를 만들고 있습니다."],
-    ["플라스틱 재활용률 80% 달성","재활용 기술의 발달로 폐기물 처리 효율이 높아졌습니다."],
-    ["신재생에너지 비중 2배 증가","태양광과 풍력 발전이 빠르게 확산되고 있습니다."],
-    ["환경보호 캠페인으로 도시 대기질 개선","시민 참여 캠페인으로 공기 질이 눈에 띄게 나아졌습니다."]
-  ],negative:[
-    ["폭염으로 사망자 급증, 기후 위기 현실로","기후 변화로 인해 극단적인 폭염이 일상화되고 있습니다."],
-    ["산불 증가, 환경 파괴 가속","건조한 날씨로 산불 피해가 급격히 증가하고 있습니다."],
-    ["해수면 상승으로 해안 도시 침수","극지방 빙하가 녹아 해수면 상승이 가속화되고 있습니다."],
-    ["미세먼지 농도 경고 수준 돌파","대기 오염으로 인한 건강 피해가 우려됩니다."],
-    ["기후 변화로 식량 부족 우려 증가","기후 변화가 농작물 수확에 악영향을 주고 있습니다."]
-  ]},
-  AI:{positive:[
-    ["AI로 질병 진단 정확도 향상","AI 알고리즘으로 더 빠르고 정확한 의료 진단이 가능해졌습니다."],
-    ["AI 덕분에 생산성 대폭 증가","반복 업무를 AI가 자동화하면서 업무 효율이 향상되었습니다."],
-    ["AI 비서로 업무 효율 향상","개인 비서 역할을 하는 AI가 일상에서 큰 도움을 줍니다."],
-    ["AI 번역 정확도 95% 돌파","언어 장벽이 줄어들며 글로벌 소통이 쉬워졌습니다."],
-    ["AI로 전기 소모량 최적화","AI가 에너지 소비를 예측하고 절약하도록 돕습니다."]
-  ],negative:[
-    ["AI로 일자리 대량 소멸 위기","AI로 인한 자동화로 일부 직업이 사라질 위기에 처했습니다."],
-    ["딥페이크로 허위정보 범람","AI 기술이 악용되어 가짜 뉴스가 퍼지고 있습니다."],
-    ["AI 편향 문제로 부당한 대우 발생","AI 알고리즘의 편향이 사회적 불평등을 키우고 있습니다."],
-    ["AI 악용한 사이버 공격 증가","AI를 이용한 정교한 해킹 사례가 늘고 있습니다."],
-    ["AI 결정의 책임 소재 불분명","AI의 판단에 대한 책임이 누구에게 있는지 불분명합니다."]
-  ]},
-  SNS:{positive:[
-    ["SNS 캠페인으로 기부금 10억 모금","온라인 참여로 많은 사람들이 기부에 동참하고 있습니다."],
-    ["소통의 창으로 재난 시 생명 구조 도움","SNS 정보가 빠른 구조 활동에 활용되었습니다."],
-    ["SNS로 가족과의 소통 유지","멀리 있는 가족과 쉽게 연락할 수 있습니다."],
-    ["SNS를 통한 정보 공유 활발","다양한 분야의 정보가 빠르게 확산됩니다."],
-    ["긍정 메시지 확산으로 심리적 위안","감동적인 이야기와 응원이 퍼지고 있습니다."]
-  ],negative:[
-    ["SNS 중독으로 청소년 정신건강 악화","지속적인 사용이 불안과 우울을 유발하고 있습니다."],
-    ["허위 정보 확산, 사회 갈등 심화","검증되지 않은 정보로 혼란이 가중되고 있습니다."],
-    ["SNS상 괴롭힘 증가로 자살률 우려","익명성에 기대어 폭력이 확산되고 있습니다."],
-    ["SNS에 의존한 허위 행복 이미지 확산","비현실적인 삶의 비교로 자존감이 하락합니다."],
-    ["SNS 사용 과다로 수면 질 악화","늦은 시간까지 사용이 수면을 방해합니다."]
-  ]},
-  연예인:{positive:[
-    ["연예인 A, 국제 시상식 대상 수상","글로벌 인정을 받은 최초의 한국 연예인으로 기록"],
-    ["팬미팅 성료, 글로벌 팬 사랑 확인","수천 명의 팬들과 뜻깊은 만남을 가졌습니다."],
-    ["선행 활동으로 기부 5억 돌파","연예인 A는 꾸준한 기부로 귀감이 되고 있습니다."],
-    ["새 음원 발매 하루 만에 1위","출시 직후 각종 차트를 석권했습니다."],
-    ["해외 투어 전석 매진","전 세계 팬들이 열광적인 반응을 보였습니다."]
-  ],negative:[
-    ["연예인 A, 탈세 의혹 파문","소득을 숨긴 정황이 포착되어 조사 중입니다."],
-    ["과거 발언 논란 재점화","이전 발언이 다시 논란을 불러일으켰습니다."],
-    ["스케줄 파행에 팬들 실망","갑작스런 일정 변경에 혼란이 있었습니다."],
-    ["소속사와 갈등 심화","계약 문제로 양측 갈등이 이어지고 있습니다."],
-    ["음주 운전 적발로 활동 중단","공식 사과 이후 모든 활동을 중단했습니다."]
-  ]}
-};
+const FEEDS={};
 let numPos=0,numNeg=0,userPos=0,userNeg=0;
 function generateFeed(){
   const topic=document.getElementById('topic-select').value;
@@ -109,7 +71,8 @@ function generateFeed(){
   container.innerHTML='';
   userPos=userNeg=0;
   const total=10;
-  numPos=Math.floor(Math.random()*(total+1));
+  let ratio=Math.floor(Math.random()*3)+6;
+  numPos=Math.random()<0.5?ratio:(total-ratio);
   numNeg=total-numPos;
   let pos=[...feedData.positive],neg=[...feedData.negative];
   while(pos.length<numPos)pos=pos.concat(feedData.positive);
@@ -119,14 +82,11 @@ function generateFeed(){
     const div=document.createElement('div');
     div.className='feed-item';
     div.dataset.state='none';
-
     const p=document.createElement('p');
     p.textContent=title;
-
     const sub=document.createElement('div');
     sub.className='subtext';
     sub.textContent=desc;
-
     const btnWrap=document.createElement('div');
     btnWrap.className='tag-buttons';
     ['긍정','부정'].forEach(l=>{
@@ -136,7 +96,6 @@ function generateFeed(){
       b.onclick=()=>mark(div,l==='긍정'?'positive':'negative');
       btnWrap.appendChild(b);
     });
-
     div.appendChild(p);
     div.appendChild(sub);
     div.appendChild(btnWrap);
@@ -170,6 +129,11 @@ function showResult(){
   document.getElementById('user-ratio').textContent=`당신의 선택: 긍정 ${userPos} / 부정 ${userNeg}`;
   document.getElementById('summary').classList.remove('hidden');
   window.scrollTo({top:document.getElementById('summary').offsetTop,behavior:'smooth'});
+}
+function goToNextPage(){
+  document.getElementById('main-page').classList.add('hidden');
+  document.getElementById('explanation-page').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 </script>
 </body>
