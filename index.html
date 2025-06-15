@@ -9,7 +9,7 @@
       --positive:#d4edda; --negative:#f8d7da; --border:#ccc;
     }
     body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:40px;display:flex;justify-content:center}
-    .container{width:100%;max-width:700px}
+    .container{width:100%;max-width:720px}
     h1,h2{margin-bottom:24px}
     select,button{padding:10px;font-size:15px;border:1px solid var(--border);border-radius:6px}
     button.generate{background:#1d9bf0;color:#fff;border:none;cursor:pointer;margin-left:8px}
@@ -23,7 +23,7 @@
 <body>
   <div class="container">
     <h1>편향 피드 체험</h1>
-    <h2>주제를 선택하고 10개의 기사를 살펴보며 긍정/부정을 선택해보세요.</h2>
+    <h2>주제를 선택하고 10개의 기사에 긍정/부정 라벨을 달아보세요.</h2>
     <select id="topic-select">
       <option value="환경">환경</option>
       <option value="AI">AI</option>
@@ -42,8 +42,8 @@ const FEEDS={
   SNS:{positive:["SNS 캠페인으로 기부금 10억 모금","소통의 창으로 재난 시 생명 구조 도움","SNS로 가족과의 소통 유지","SNS를 통한 정보 공유 활발","긍정 메시지 확산으로 심리적 위안"],negative:["SNS 중독으로 청소년 정신건강 악화","허위 정보 확산, 사회 갈등 심화","SNS상 괴롭힘 증가로 자살률 우려","SNS에 의존한 허위 행복 이미지 확산","SNS 사용 과다로 수면 질 악화"]},
   연예인:{positive:["연예인 A, 국제 시상식 대상 수상","팬미팅 성료, 글로벌 팬 사랑 확인","선행 활동으로 기부 5억 돌파","새 음원 발매 하루 만에 1위","해외 투어 전석 매진"],negative:["연예인 A, 탈세 의혹 파문","과거 발언 논란 재점화","스케줄 파행에 팬들 실망","소속사와 갈등 심화","음주 운전 적발로 활동 중단"]}
 };
-function generateFeed(){const topic=document.getElementById('topic-select').value;const feedData=FEEDS[topic];const container=document.getElementById('feed-container');container.innerHTML='';const total=10;const numPos=Math.floor(Math.random()*(total+1));const numNeg=total-numPos;const pos=[...feedData.positive];const neg=[...feedData.negative];while(pos.length<numPos)pos.push(...feedData.positive);while(neg.length<numNeg)neg.push(...feedData.negative);const mixed=[...pos.slice(0,numPos),...neg.slice(0,numNeg)].sort(()=>Math.random()-.5);mixed.forEach((txt,i)=>{const div=document.createElement('div');div.className='feed-item';div.id='feed'+i;const p=document.createElement('p');p.textContent=txt;const btnWrap=document.createElement('div');btnWrap.className='tag-buttons';['긍정','부정'].forEach(label=>{const b=document.createElement('button');b.textContent=label;b.className='tag-button';b.onclick=()=>mark(div,label==='긍정'?'positive':'negative');btnWrap.appendChild(b);});div.appendChild(p);div.appendChild(btnWrap);container.appendChild(div);});}
-function mark(item,state){item.classList.remove('positive','negative');if(state)item.classList.add(state);}
+function generateFeed(){const topic=document.getElementById('topic-select').value;const feedData=FEEDS[topic];const container=document.getElementById('feed-container');container.innerHTML='';const total=10;const numPos=Math.floor(Math.random()*(total+1));const numNeg=total-numPos;let pos=[...feedData.positive];let neg=[...feedData.negative];while(pos.length<numPos)pos=[...pos,...feedData.positive];while(neg.length<numNeg)neg=[...neg,...feedData.negative];const mixed=[...pos.slice(0,numPos),...neg.slice(0,numNeg)].sort(()=>Math.random()-.5);mixed.forEach((txt,i)=>{const div=document.createElement('div');div.className='feed-item';const p=document.createElement('p');p.textContent=txt;const btnWrap=document.createElement('div');btnWrap.className='tag-buttons';['긍정','부정'].forEach(l=>{const b=document.createElement('button');b.textContent=l;b.className='tag-button';b.onclick=()=>toggle(div,l==='긍정'? 'positive':'negative');btnWrap.appendChild(b);});div.appendChild(p);div.appendChild(btnWrap);container.appendChild(div);});}
+function toggle(item,state){item.classList.remove('positive','negative');item.classList.add(state);} 
 </script>
 </body>
 </html>
