@@ -3,29 +3,91 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI 맞춤형 SNS (Falcon 모델)</title>
+  <title>AI 맞춤형 SNS (무료 모델)</title>
   <style>
-    :root{--primary:#1da1f2;--bg:#f5f8fa;--card:#fff;--border:#e6ecf0;--text:#14171a;--subtext:#657786}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;background:var(--bg);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding-top:40px}
-    #auth-section,#interest-section{width:100%;max-width:400px;background:var(--card);padding:32px 40px;border:1px solid var(--border);border-radius:16px;box-shadow:0 6px 16px rgba(0,0,0,.05)}
-    #feed-section{display:none;width:100%;max-width:600px;animation:fadeIn .4s ease}
-    h1,h2{text-align:center;color:var(--text)}
-    .input,.btn,#search-bar{width:100%;padding:12px 14px;margin-top:12px;border:1px solid var(--border);border-radius:8px;font-size:15px}
-    .btn{background:var(--primary);color:#fff;border:none;border-radius:9999px;cursor:pointer}
-    .btn:hover{background:#0d8de1}
-    .tweet{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 20px;margin-bottom:16px}
-    .tweet-user{font-weight:bold}.tweet-time{font-size:12px;color:var(--subtext)}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+    :root {
+      --primary: #1da1f2;
+      --bg: #f5f8fa;
+      --card: #ffffff;
+      --border: #e6ecf0;
+      --text: #14171a;
+      --subtext: #657786;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding-top: 40px;
+    }
+    #auth-section, #interest-section {
+      width: 100%;
+      max-width: 400px;
+      background: var(--card);
+      padding: 32px 40px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+    }
+    #feed-section {
+      display: none;
+      width: 100%;
+      max-width: 600px;
+    }
+    h1, h2 {
+      text-align: center;
+      color: var(--text);
+    }
+    .input, .btn, #search-bar {
+      width: 100%;
+      padding: 12px 14px;
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: #0d8de1;
+    }
+    .tweet {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .tweet-user {
+      font-weight: bold;
+    }
+    .tweet-time {
+      font-size: 12px;
+      color: var(--subtext);
+    }
   </style>
 </head>
 <body>
+
   <section id="auth-section">
     <h1 id="auth-title">로그인</h1>
     <input id="auth-id" class="input" placeholder="아이디" />
     <input id="auth-pw" class="input" type="password" placeholder="비밀번호" />
     <button id="auth-btn" class="btn">로그인</button>
-    <p id="switch-msg" style="text-align:center;margin-top:16px;">계정이 없으신가요? <span id="switch-link" style="color:var(--primary);cursor:pointer">회원가입</span></p>
+    <p id="switch-msg" style="text-align: center; margin-top: 16px;">
+      계정이 없으신가요? <span id="switch-link" style="color: var(--primary); cursor: pointer;">회원가입</span>
+    </p>
   </section>
 
   <section id="interest-section" style="display:none;">
@@ -35,77 +97,120 @@
   </section>
 
   <section id="feed-section">
-    <input id="search-bar" placeholder="검색어를 입력하고 Enter" />
+    <input id="search-bar" class="input" placeholder="검색어를 입력하고 Enter" />
     <div id="tweets"></div>
   </section>
 
-<script>
-let isLogin=true,userInterest="";
-const authS=document.getElementById("auth-section"),authT=document.getElementById("auth-title"),authB=document.getElementById("auth-btn"),switchM=document.getElementById("switch-msg");
-let switchL=document.getElementById("switch-link");
-const authId=document.getElementById("auth-id"),authPw=document.getElementById("auth-pw");
-const interestS=document.getElementById("interest-section"),interestI=document.getElementById("interest-input"),interestB=document.getElementById("interest-btn");
-const feedS=document.getElementById("feed-section"),tweets=document.getElementById("tweets"),search=document.getElementById("search-bar");
+  <script>
+    let isLogin = true;
+    let userInterest = "";
 
-function refreshAuth(){
-  authT.textContent=isLogin?"로그인":"회원가입";
-  authB.textContent=isLogin?"로그인":"회원가입";
-  switchM.innerHTML=isLogin
-    ? `계정이 없으신가요? <span id="switch-link" style="color:var(--primary);cursor:pointer">회원가입</span>`
-    : `이미 계정이 있으신가요? <span id="switch-link" style="color:var(--primary);cursor:pointer">로그인</span>`;
-  switchL=document.getElementById("switch-link");
-  switchL.onclick=()=>{isLogin=!isLogin;refreshAuth();};
-}
+    const authSection = document.getElementById("auth-section");
+    const authTitle = document.getElementById("auth-title");
+    const authBtn = document.getElementById("auth-btn");
+    const switchMsg = document.getElementById("switch-msg");
+    const authId = document.getElementById("auth-id");
+    const authPw = document.getElementById("auth-pw");
+    const interestSection = document.getElementById("interest-section");
+    const interestInput = document.getElementById("interest-input");
+    const interestBtn = document.getElementById("interest-btn");
+    const feedSection = document.getElementById("feed-section");
+    const tweetsDiv = document.getElementById("tweets");
+    const searchBar = document.getElementById("search-bar");
 
-switchL.onclick=()=>{isLogin=!isLogin;refreshAuth();};
-
-authB.onclick=()=>{
-  if(!authId.value.trim()||!authPw.value.trim()){alert("아이디와 비밀번호를 입력하세요.");return;}
-  alert(`${authId.value} 님, ${isLogin?"로그인":"회원가입"}이 완료되었습니다.`);
-  authS.style.display="none";interestS.style.display="block";
-};
-
-interestB.onclick=()=>{
-  if(!interestI.value.trim()){alert("관심사를 입력해주세요.");return;}
-  userInterest=interestI.value.trim();
-  interestS.style.display="none";feedS.style.display="block";tweets.innerHTML="";
-  postTweet(userInterest);
-};
-
-search.addEventListener("keyup",e=>{if(e.key==="Enter"&&search.value.trim()){postTweet(search.value.trim(),true);search.value="";}});
-
-const HF_KEY="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";
-const MODEL_URL="https://api-inference.huggingface.co/models/tiiuae/falcon-7b-instruct";
-async function callModel(prompt){
-  try{
-    const response = await fetch(MODEL_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${HF_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({inputs: prompt})
-    });
-    if(!response.ok){
-      console.error("모델 호출 실패", response.status);
-      return "[모델 호출 오류]";
+    function refreshAuthText() {
+      authTitle.textContent = isLogin ? "로그인" : "회원가입";
+      authBtn.textContent = isLogin ? "로그인" : "회원가입";
+      switchMsg.innerHTML = isLogin
+        ? '계정이 없으신가요? <span id="switch-link" style="color: var(--primary); cursor: pointer;">회원가입</span>'
+        : '이미 계정이 있으신가요? <span id="switch-link" style="color: var(--primary); cursor: pointer;">로그인</span>';
+      document.getElementById("switch-link").addEventListener("click", () => {
+        isLogin = !isLogin;
+        refreshAuthText();
+      });
     }
-    const data = await response.json();
-    return data?.[0]?.generated_text || "[응답 없음]";
-  } catch (e) {
-    console.error(e);
-    return "[예외 오류 발생]";
-  }
-}
 
-async function postTweet(topic,prepend=false){
-  const el=document.createElement("div");
-  el.className="tweet";
-  el.innerHTML=`<p class="tweet-user">Falcon AI</p><p class="tweet-content">생성 중...</p><p class="tweet-time">방금</p>`;
-  prepend?tweets.prepend(el):tweets.appendChild(el);
-  const result = await callModel(`Write a short, sensational fake news post in Korean about: ${topic}. Please respond in Korean.`);
-  el.querySelector(".tweet-content").textContent = result;
-}
-</script>
+    document.getElementById("switch-link").addEventListener("click", () => {
+      isLogin = !isLogin;
+      refreshAuthText();
+    });
+
+    authBtn.addEventListener("click", () => {
+      const id = authId.value.trim();
+      const pw = authPw.value.trim();
+      if (!id || !pw) {
+        alert("아이디와 비밀번호를 입력하세요.");
+        return;
+      }
+      alert(`${id} 님, ${isLogin ? "로그인" : "회원가입"}이 완료되었습니다.`);
+      authSection.style.display = "none";
+      interestSection.style.display = "block";
+    });
+
+    interestBtn.addEventListener("click", () => {
+      const interest = interestInput.value.trim();
+      if (!interest) {
+        alert("관심사를 입력해주세요.");
+        return;
+      }
+      userInterest = interest;
+      interestSection.style.display = "none";
+      feedSection.style.display = "block";
+      tweetsDiv.innerHTML = "";
+      postTweet(userInterest);
+    });
+
+    searchBar.addEventListener("keyup", (e) => {
+      if (e.key === "Enter") {
+        const query = searchBar.value.trim();
+        if (query) {
+          postTweet(query, true);
+          searchBar.value = "";
+        }
+      }
+    });
+
+    const HF_KEY = "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";
+    const MODEL_URL = "https://api-inference.huggingface.co/models/tiiuae/falcon-rw-1b";
+
+    async function callModel(prompt) {
+      try {
+        const response = await fetch(MODEL_URL, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${HF_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ inputs: prompt })
+        });
+
+        if (!response.ok) {
+          console.error("모델 호출 실패", response.status);
+          return "[모델 호출 오류]";
+        }
+
+        const data = await response.json();
+        return data[0]?.generated_text || "[응답 없음]";
+      } catch (error) {
+        console.error("예외 발생:", error);
+        return "[예외 오류 발생]";
+      }
+    }
+
+    async function postTweet(topic, prepend = false) {
+      const el = document.createElement("div");
+      el.className = "tweet";
+      el.innerHTML = `
+        <p class="tweet-user">AI 뉴스</p>
+        <p class="tweet-content">생성 중...</p>
+        <p class="tweet-time">방금</p>
+      `;
+      prepend ? tweetsDiv.prepend(el) : tweetsDiv.appendChild(el);
+
+      const prompt = `${topic}에 대해 한국어로 자극적인 뉴스 제목을 1~2문장으로 작성해줘.`;
+      const result = await callModel(prompt);
+      el.querySelector(".tweet-content").textContent = result;
+    }
+  </script>
 </body>
 </html>
