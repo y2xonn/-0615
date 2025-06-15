@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI 맞춤형 SNS (BLOOMZ-560M)</title>
+  <title>AI 맞춤형 SNS (FLAN-T5-Small)</title>
   <style>
     :root{--primary:#1da1f2;--bg:#f5f8fa;--card:#fff;--border:#e6ecf0;--text:#14171a;--subtext:#657786}
     *{box-sizing:border-box}
@@ -75,22 +75,36 @@ interestB.onclick=()=>{
 search.addEventListener("keyup",e=>{if(e.key==="Enter"&&search.value.trim()){postTweet(search.value.trim(),true);search.value="";}});
 
 const HF_KEY="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";
-const MODEL_URL="https://api-inference.huggingface.co/models/bigscience/bloomz-560m";
-async function callBloomz(prompt){
+const MODEL_URL="https://api-inference.huggingface.co/models/google/flan-t5-small";
+async function callModel(prompt){
   try{
-    const r=await fetch(MODEL_URL,{method:"POST",headers:{"Authorization":"Bearer "+HF_KEY,"Content-Type":"application/json"},body:JSON.stringify({inputs:prompt,max_new_tokens:60})});
-    if(!r.ok){console.error("BLOOMZ HTTP",r.status);return"[BLOOMZ 호출 오류]";}
-    const d=await r.json();return d?.[0]?.generated_text||"[응답 없음]";
-  }catch(e){console.error(e);return"[BLOOMZ 호출 오류]";}
+    const response = await fetch(MODEL_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${HF_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({inputs: prompt})
+    });
+    if(!response.ok){
+      console.error("모델 호출 실패", response.status);
+      return "[모델 호출 오류]";
+    }
+    const data = await response.json();
+    return data?.[0]?.generated_text || "[응답 없음]";
+  } catch (e) {
+    console.error(e);
+    return "[예외 오류 발생]";
+  }
 }
 
 async function postTweet(topic,prepend=false){
   const el=document.createElement("div");
   el.className="tweet";
-  el.innerHTML=`<p class="tweet-user">BLOOMZ AI</p><p class="tweet-content">생성 중...</p><p class="tweet-time">방금</p>`;
+  el.innerHTML=`<p class="tweet-user">FLAN AI</p><p class="tweet-content">생성 중...</p><p class="tweet-time">방금</p>`;
   prepend?tweets.prepend(el):tweets.appendChild(el);
-  const txt=await callBloomz(`${topic}에 대한 자극적인 가짜 뉴스 스타일 문장을 작성해줘. 한국어로.`);
-  el.querySelector(".tweet-content").textContent=txt;
+  const result = await callModel(`Write a sensational fake news headline in Korean about: ${topic}`);
+  el.querySelector(".tweet-content").textContent = result;
 }
 </script>
 </body>
