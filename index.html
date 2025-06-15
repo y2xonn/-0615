@@ -82,7 +82,7 @@ interestB.onclick=()=>{
 search.addEventListener("keyup",e=>{if(e.key==="Enter"&&search.value.trim()){postTweet(search.value.trim(),true);search.value="";}});
 
 // ===== Hugging Face BLOOMZ 560M 호출 =====
-const HF_KEY="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";
+const HF_KEY="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";
 const MODEL_URL="https://api-inference.huggingface.co/models/bigscience/bloomz-560m";
 async function callBloomz(prompt){
   try{
