@@ -68,11 +68,15 @@ const FEEDS = {
       ["신재생 에너지 투자 확대", "태양광과 풍력에 대한 대규모 투자가 진행 중입니다."],
       ["환경 보호 정책 강화", "정부가 플라스틱 규제를 강화했습니다."],
       ["청정 공기 도시 선정", "서울, 아시아에서 가장 공기 질이 개선된 도시로 선정됨."],
+      ["탄소배출권 거래 활성화", "기업들이 친환경 정책에 적극 참여하고 있습니다."],
+      ["녹색 기술 스타트업 급증", "환경 문제 해결을 위한 기술 창업이 활발해지고 있습니다."],
     ],
     negative: [
       ["산불로 산림 300헥타르 소실", "건조한 날씨로 인해 대형 산불 발생."],
       ["해양 쓰레기 급증", "플라스틱 오염으로 해양 생태계가 위협받고 있습니다."],
       ["기후변화로 농작물 피해 확대", "이상 고온으로 농업 생산량 감소."],
+      ["미세먼지 다시 악화세", "대기 질이 다시 나빠지고 있다는 보고입니다."],
+      ["플라스틱 재활용률 하락", "분리배출 문제로 재활용 효율이 떨어지고 있습니다."],
     ]
   },
   "AI": {
@@ -80,108 +84,48 @@ const FEEDS = {
       ["AI로 질병 진단 정확도 향상", "AI 기술로 조기 진단의 정확도가 높아졌습니다."],
       ["자율주행 기술 발전", "AI로 교통사고 감소 가능성이 높아졌습니다."],
       ["AI 튜터 확산", "학생들의 개별 학습을 돕는 AI 교사 등장."],
+      ["AI로 재난 예측 정밀도 향상", "지진, 홍수 등 자연재해에 대한 예측력이 강화되었습니다."],
+      ["AI 번역기 정확도 향상", "글로벌 커뮤니케이션이 한층 쉬워졌습니다."],
     ],
     negative: [
       ["AI로 일자리 감소 우려", "단순 반복직 중심으로 일자리 대체가 진행 중."],
       ["AI 알고리즘의 차별 논란", "편향된 데이터로 인한 공정성 이슈 발생."],
       ["AI 범죄 악용 사례 증가", "딥페이크와 해킹 등 부작용 확산."],
+      ["AI 채용 시스템 논란", "지원자 필터링 과정의 투명성 부족 문제."],
+      ["AI로 인해 사생활 침해 우려", "감시 기술 확산으로 프라이버시 위협 증가."],
     ]
   },
   "SNS": {
     positive: [
       ["SNS로 실종 아동 찾은 사례 화제", "빠른 확산 덕분에 아동이 무사히 가족의 품으로."],
       ["SNS를 통한 사회운동 활성화", "기부 캠페인과 사회적 행동이 활발해짐."],
+      ["SNS로 소상공인 매출 향상", "홍보 효과로 매출이 눈에 띄게 증가."],
+      ["SNS로 긴급 재난 정보 공유", "재난 상황 시 빠른 정보 전달이 가능해졌습니다."],
     ],
     negative: [
       ["SNS 가짜뉴스 확산 문제", "허위 정보가 무분별하게 퍼지고 있습니다."],
       ["SNS 중독 증가", "청소년의 수면 부족과 불안감이 문제로 지적됨."],
       ["혐오 발언과 사이버불링 증가", "온라인 폭력이 심각한 수준에 도달."],
+      ["SNS로 인한 사생활 노출", "개인정보가 무단으로 퍼지는 사례가 발생."],
+      ["SNS 알고리즘의 편향성 논란", "특정 콘텐츠만 노출되는 문제 지적."],
     ]
   },
   "연예인": {
     positive: [
       ["연예인 A, 기부 천사로 선정", "올해만 5억 원 이상 기부한 것으로 밝혀짐."],
       ["연예인 A, 환경 캠페인 참여", "플라스틱 줄이기 운동에 동참."],
+      ["연예인 A, 유기동물 보호소 후원", "버려진 반려동물을 위한 지속적인 기부."],
+      ["연예인 A, 해외 봉사활동 참여", "개발도상국에서 자원봉사자로 활동."],
     ],
     negative: [
       ["연예인 A, 탈세 의혹 조사", "수억 원의 세금을 회피한 혐의로 조사 중."],
       ["연예인 A, 폭행 사건 논란", "지인과의 마찰로 물의를 빚음."],
       ["연예인 A, 광고 계약 해지 잇따라", "이미지 추락으로 기업들 계약 종료."],
+      ["연예인 A, 공공장소 흡연 논란", "팬들과 시민들의 우려가 이어지고 있음."],
+      ["연예인 A, 팬 비하 발언 논란", "라이브 방송 중 부적절한 발언으로 논란."],
     ]
   }
 };
-let numPos=0,numNeg=0,userPos=0,userNeg=0;
-function generateFeed(){
-  const topic=document.getElementById('topic-select').value;
-  const feedData=FEEDS[topic];
-  const container=document.getElementById('feed-container');
-  container.innerHTML='';
-  userPos=userNeg=0;
-  const total=10;
-  let ratio=Math.floor(Math.random()*3)+6;
-  numPos=Math.random()<0.5?ratio:(total-ratio);
-  numNeg=total-numPos;
-  let pos=[...feedData.positive],neg=[...feedData.negative];
-  while(pos.length<numPos)pos=pos.concat(feedData.positive);
-  while(neg.length<numNeg)neg=neg.concat(feedData.negative);
-  const mixed=[...pos.slice(0,numPos).map(x=>[x[0],x[1],'positive']),...neg.slice(0,numNeg).map(x=>[x[0],x[1],'negative'])].sort(()=>Math.random()-.5);
-  mixed.forEach(([title,desc,label],i)=>{
-    const div=document.createElement('div');
-    div.className='feed-item';
-    div.dataset.state='none';
-    const p=document.createElement('p');
-    p.textContent=title;
-    const sub=document.createElement('div');
-    sub.className='subtext';
-    sub.textContent=desc;
-    const btnWrap=document.createElement('div');
-    btnWrap.className='tag-buttons';
-    ['긍정','부정'].forEach(l=>{
-      const b=document.createElement('button');
-      b.textContent=l;
-      b.className='tag-button';
-      b.onclick=()=>mark(div,l==='긍정'?'positive':'negative');
-      btnWrap.appendChild(b);
-    });
-    div.appendChild(p);
-    div.appendChild(sub);
-    div.appendChild(btnWrap);
-    container.appendChild(div);
-  });
-  document.getElementById('result-btn').classList.remove('hidden');
-  document.getElementById('summary').classList.add('hidden');
-}
-function mark(div,state){
-  const prev=div.dataset.state;
-  if(prev===state)return;
-  if(prev==='positive')userPos--;
-  if(prev==='negative')userNeg--;
-  if(state==='positive'){
-    userPos++;
-    div.classList.add('positive');
-    div.classList.remove('negative');
-  }else{
-    userNeg++;
-    div.classList.add('negative');
-    div.classList.remove('positive');
-  }
-  div.dataset.state=state;
-}
-function showResult(){
-  const totalTagged=userPos+userNeg;
-  if(totalTagged<10){
-    alert(`10개 중 ${10-totalTagged}개 기사에 아직 선택이 안 되어 있어요!`);
-  }
-  document.getElementById('actual-ratio').textContent=`실제 비율: 긍정 ${numPos} / 부정 ${numNeg}`;
-  document.getElementById('user-ratio').textContent=`당신의 선택: 긍정 ${userPos} / 부정 ${userNeg}`;
-  document.getElementById('summary').classList.remove('hidden');
-  window.scrollTo({top:document.getElementById('summary').offsetTop,behavior:'smooth'});
-}
-function goToNextPage(){
-  document.getElementById('main-page').classList.add('hidden');
-  document.getElementById('explanation-page').classList.remove('hidden');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
 </script>
 </body>
 </html>
