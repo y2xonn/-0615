@@ -6,206 +6,56 @@
   <title>편향 피드 체험</title>
   <style>
     :root {
-      --primary: #1d9bf0;
-      --bg: #f4f6f8;
-      --card: #ffffff;
-      --border: #e1e8ed;
-      --text: #0f1419;
-      --sub: #536471;
-      --radius: 16px;
-      --shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+      --primary:#1d9bf0;--bg:#f4f6f8;--card:#fff;--border:#e1e8ed;--text:#0f1419;--sub:#536471;--radius:16px;--shadow:0 6px 16px rgba(0,0,0,.06);--pos:#d4edda;--neg:#f8d7da;
     }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    }
-    body {
-      background: var(--bg);
-      display: flex;
-      justify-content: center;
-      padding: 60px 16px;
-    }
-    .container {
-      width: 100%;
-      max-width: 680px;
-    }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 32px 40px;
-      margin-bottom: 32px;
-    }
-    h1, h2, h3 {
-      color: var(--text);
-      margin-bottom: 24px;
-      font-weight: 700;
-    }
-    p {
-      color: var(--sub);
-      line-height: 1.6;
-      margin-bottom: 16px;
-      font-size: 15px;
-    }
-    .btn {
-      display: inline-block;
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      padding: 12px 28px;
-      border-radius: 9999px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 600;
-      transition: 0.25s;
-      margin-top: 12px;
-    }
-    .btn:hover {
-      background: #1478c9;
-    }
-    .feed-item {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 20px;
-      background: #fff;
-    }
-    .hidden { display: none; }
-    textarea, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+    body{background:var(--bg);display:flex;justify-content:center;padding:60px 16px}
+    .container{width:100%;max-width:700px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:32px 40px;margin-bottom:32px}
+    h1,h2,h3{color:var(--text);margin-bottom:24px;font-weight:700}
+    p{color:var(--sub);margin-bottom:16px;line-height:1.6;font-size:15px}
+    .btn{background:var(--primary);color:#fff;border:none;padding:12px 28px;border-radius:9999px;font-size:15px;font-weight:600;cursor:pointer;margin-top:12px;transition:.25s}
+    .btn:hover{background:#1478c9}
+    .feed-item{border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px;background:#fff}
+    .hidden{display:none}
+    textarea,select{width:100%;padding:10px;margin-top:10px;border-radius:8px;border:1px solid var(--border)}
+    .tag-buttons{margin-top:10px}
+    .tag-button{padding:6px 12px;margin-right:8px;border-radius:8px;border:1px solid #ccc;cursor:pointer;font-size:14px}
+    .positive{background:var(--pos)!important}
+    .negative{background:var(--neg)!important}
   </style>
 </head>
 <body>
   <main class="container">
-    <section id="intro" class="card">
-      <h1>내 피드는 편향되어 있을까?</h1>
-      <p>정보 비율의 왜곡이 어떻게 인식에 영향을 줄까요?</p>
-      <button class="btn" onclick="showStep('choose')">체험 시작</button>
-    </section>
+    <!-- Intro -->
+    <section id="intro" class="card"><h1>내 피드는 편향되어 있을까?</h1><p>정보 비율의 왜곡이 어떻게 인식에 영향을 줄까요?</p><button class="btn" onclick="showStep('choose')">체험 시작</button></section>
 
-    <section id="choose" class="card hidden">
-      <h2>주제를 선택하세요</h2>
-      <select id="topic-select">
+    <!-- Topic choose -->
+    <section id="choose" class="card hidden"><h2>주제를 선택하세요</h2><select id="topic-select">
         <option value="환경">환경</option>
         <option value="AI">AI</option>
         <option value="SNS">SNS</option>
-      </select>
-      <button class="btn" onclick="startFeed()">피드 보기</button>
-    </section>
+        <option value="연예인">연예인</option>
+    </select><button class="btn" onclick="startFeed()">피드 보기</button></section>
 
-    <section id="feed" class="card hidden">
-      <h2>당신을 위한 피드</h2>
-      <div id="feed-items"></div>
-      <button class="btn" onclick="showStep('survey')">설문 진행</button>
-    </section>
+    <!-- Feed -->
+    <section id="feed" class="card hidden"><h2>당신을 위한 피드</h2><div id="feed-items"></div><button class="btn" onclick="showStep('survey')">설문 진행</button></section>
 
-    <section id="survey" class="card hidden">
-      <h2>이 피드는 어떤 방향으로 치우쳐 있었나요?</h2>
-      <select id="bias-answer">
-        <option value="positive">긍정적</option>
-        <option value="negative">부정적</option>
-        <option value="balanced">균형적</option>
-        <option value="unsure">잘 모르겠음</option>
-      </select>
-      <p>이유를 간단히 적어주세요:</p>
-      <textarea rows="4" id="bias-reason" placeholder="예: 대부분 부정적인 내용이 많았어요."></textarea>
-      <button class="btn" onclick="showStep('summary')">결과 보기</button>
-    </section>
+    <!-- Survey -->
+    <section id="survey" class="card hidden"><h2>이 피드는 어떤 방향으로 치우쳐 있었나요?</h2><select id="bias-answer"><option value="positive">긍정적</option><option value="negative">부정적</option><option value="balanced">균형적</option><option value="unsure">잘 모르겠음</option></select><p>이유를 간단히 적어주세요:</p><textarea rows="4" id="bias-reason" placeholder="예: 대부분 부정적인 내용이 많았어요."></textarea><button class="btn" onclick="showSummary()">결과 보기</button></section>
 
-    <section id="summary" class="card hidden">
-      <h2>실제 피드 구성</h2>
-      <p id="actual-ratio"></p>
-      <p>알고리즘이 특정 비율로 정보를 제공하면, 우리의 인식은 쉽게 편향될 수 있습니다.</p>
-      <h3>필터버블 & 확증편향이란?</h3>
-      <ul>
-        <li><strong>필터버블</strong>: 알고리즘이 선호에 맞는 정보만 제공</li>
-        <li><strong>확증편향</strong>: 보고 싶은 정보만 받아들이려는 심리</li>
-      </ul>
-      <p>균형 잡힌 정보 소비를 위해 다양한 출처와 관점을 접해보세요.</p>
-      <button class="btn" onclick="location.reload()">처음으로</button>
-    </section>
+    <!-- Summary -->
+    <section id="summary" class="card hidden"><h2>실제 피드 구성</h2><p id="actual-ratio"></p><p id="user-ratio"></p><p>알고리즘이 특정 비율로 정보를 제공하면, 우리의 인식은 쉽게 편향될 수 있습니다.</p><h3>필터버블 & 확증편향이란?</h3><ul><li><strong>필터버블</strong>: 알고리즘이 선호에 맞는 정보만 제공</li><li><strong>확증편향</strong>: 보고 싶은 정보만 받아들이려는 심리</li></ul><p>균형 잡힌 정보 소비를 위해 다양한 출처와 관점을 접해보세요.</p><button class="btn" onclick="location.reload()">처음으로</button></section>
   </main>
 
-  <script>
-    const FEEDS = {
-      환경: {
-        positive: [
-          "전 세계 탄소 배출 감소, 녹색 전환 가속화",
-          "친환경 기술 투자 증가로 일자리 창출"
-        ],
-        negative: [
-          "폭염으로 사망자 급증, 기후 위기 현실로",
-          "산불 증가, 환경 파괴 가속"
-        ]
-      },
-      AI: {
-        positive: [
-          "AI로 질병 진단 정확도 향상",
-          "AI 덕분에 생산성 대폭 증가"
-        ],
-        negative: [
-          "AI로 일자리 대량 소멸 위기",
-          "딥페이크로 허위정보 범람"
-        ]
-      },
-      SNS: {
-        positive: [
-          "SNS 캠페인으로 기부금 10억 모금",
-          "소통의 창으로 재난 시 생명 구조 도움"
-        ],
-        negative: [
-          "SNS 중독으로 청소년 정신건강 악화",
-          "허위 정보 확산, 사회 갈등 심화"
-        ]
-      }
-    };
-
-    function showStep(id) {
-      document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-      document.getElementById(id).classList.remove('hidden');
-    }
-
-    function startFeed() {
-      const topic = document.getElementById("topic-select").value;
-      const feed = FEEDS[topic];
-      const container = document.getElementById("feed-items");
-      container.innerHTML = '';
-
-      // 랜덤 비율 결정 (6:4 이상 유지)
-      const positiveRatio = Math.random() < 0.5 ? 0.4 : 0.6;
-      const negativeRatio = 1 - positiveRatio;
-
-      const totalItems = 5;
-      const numPositive = Math.round(totalItems * positiveRatio);
-      const numNegative = totalItems - numPositive;
-
-      const positiveItems = feed.positive.slice(0, numPositive);
-      const negativeItems = feed.negative.slice(0, numNegative);
-
-      const mixed = [...positiveItems, ...negativeItems];
-      mixed.sort(() => Math.random() - 0.5);
-
-      mixed.forEach(text => {
-        const div = document.createElement("div");
-        div.className = "feed-item";
-        div.textContent = text;
-        container.appendChild(div);
-      });
-
-      // 비율 정보 저장 (설명용)
-      const actual = document.getElementById("actual-ratio");
-      actual.textContent = `이번 피드는 실제로 긍정 뉴스 ${numPositive}, 부정 뉴스 ${numNegative}개로 구성되어 있었습니다.`;
-
-      showStep("feed");
-    }
-  </script>
-</body>
-</html>
+<script>
+const FEEDS={
+ 환경:{positive:["전 세계 탄소 배출 감소, 녹색 전환 가속화","친환경 기술 투자 증가로 일자리 창출","플라스틱 재활용률 80% 달성","신재생에너지 비중 2배 증가","환경보호 캠페인으로 도시 대기질 개선"],negative:["폭염으로 사망자 급증, 기후 위기 현실로","산불 증가, 환경 파괴 가속","해수면 상승으로 해안 도시 침수","미세먼지 농도 경고 수준 돌파","기후 변화로 식량 부족 우려 증가"]},
+ AI:{positive:["AI로 질병 진단 정확도 향상","AI 덕분에 생산성 대폭 증가","AI 비서로 업무 효율 향상","AI 번역 정확도 95% 돌파","AI로 전기 소모량 최적화"],negative:["AI로 일자리 대량 소멸 위기","딥페이크로 허위정보 범람","AI 편향 문제로 부당한 대우 발생","AI 악용한 사이버 공격 증가","AI 결정의 책임 소재 불분명"]},
+ SNS:{positive:["SNS 캠페인으로 기부금 10억 모금","소통의 창으로 재난 시 생명 구조 도움","SNS로 가족과의 소통 유지","SNS를 통한 정보 공유 활발","긍정 메시지 확산으로 심리적 위안"],negative:["SNS 중독으로 청소년 정신건강 악화","허위 정보 확산, 사회 갈등 심화","SNS상 괴롭힘 증가로 자살률 우려","SNS에 의존한 허위 행복 이미지 확산","SNS 사용 과다로 수면 질 악화"]},
+ 연예인:{positive:["연예인 A, 국제 시상식 대상 수상","팬미팅 성료, 글로벌 팬 사랑 확인","선행 활동으로 기부 5억 돌파","새 음원 발매 하루 만에 1위","해외 투어 전 석 매진"],negative:["연예인 A, 탈세 의혹 파문","과거 발언 논란 재점화","스케줄 파행에 팬들 실망","소속사와 갈등 심화","음주 운전 적발로 활동 중단"]}
+};
+let userPositive=0,userNegative=0,numPositive=0,numNegative=0;
+function showStep(id){document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
+function startFeed(){const topic=document.getElementById('topic-select').value;const feed=FEEDS[topic];const container=document.getElementById('feed-items');container.innerHTML='';userPositive=userNegative=0;const total=10;numPositive=Math.floor(Math.random()*(total+1));numNegative=total-numPositive;const pos=[...feed.positive].sort(()=>Math.random()-.5).slice(0,numPositive);const neg=[...feed.negative].sort(()=>Math.random()-.5).slice(0,numNegative);const mixed=[...pos,...neg].sort(()=>Math.random()-.5);mixed.forEach(text=>{const div=document.createElement('div');div.className='feed-item';div.dataset.state='none';const p=document.createElement('p');p.textContent=text;const tag=document.createElement('div');tag.className='tag-buttons';['긍정','부정'].forEach(label=>{const btn=document.createElement('button');btn.textContent=label;btn.className='tag-button';btn.onclick=()=>updateTag(div,label==='긍정'?'positive':'negative');tag.appendChild(btn);});div.appendChild(p);div.appendChild(tag);container.appendChild(div);});showStep('feed');}
+function updateTag(el,newState){const prev=el.dataset.state;if(prev===newState)return;if(prev==='positive')userPositive--;if(prev==='negative')userNegative--;if(newState==='positive'){userPositive++;el.classList.add('positive');el.classList.remove
