@@ -3,158 +3,101 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI 맞춤형 SNS (BLOOMZ)</title>
+  <title>AI 맞춤형 SNS (BLOOMZ‑560M)</title>
   <style>
     :root {
-      --primary: #1da1f2;
-      --bg: #f5f8fa;
-      --card: #ffffff;
-      --border: #e6ecf0;
-      --text: #14171a;
-      --subtext: #657786;
+      --primary: #1da1f2; --bg:#f5f8fa; --card:#fff; --border:#e6ecf0; --text:#14171a; --subtext:#657786;
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;
-      background: var(--bg);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      padding-top: 40px;
-    }
-    #auth-section,#interest-section{
-      width:100%;max-width:400px;background:var(--card);padding:32px 40px;border:1px solid var(--border);border-radius:16px;box-shadow:0 6px 16px rgba(0,0,0,.05);
-    }
-    #feed-section{display:none;width:100%;max-width:600px;animation:fadeIn .4s ease;}
-    h1,h2{text-align:center;color:var(--text);}
-    .input,.btn,#search-bar{width:100%;padding:12px 14px;margin-top:12px;border:1px solid var(--border);border-radius:8px;font-size:15px;}
-    .btn{background:var(--primary);color:#fff;border:none;border-radius:9999px;cursor:pointer;}
-    .btn:hover{background:#0d8de1;}
-    .tweet{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 20px;margin-bottom:16px;}
-    .tweet-user{font-weight:bold;}
-    .tweet-time{font-size:12px;color:var(--subtext);}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:translateY(0);}}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;background:var(--bg);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding-top:40px}
+    #auth-section,#interest-section{width:100%;max-width:400px;background:var(--card);padding:32px 40px;border:1px solid var(--border);border-radius:16px;box-shadow:0 6px 16px rgba(0,0,0,.05)}
+    #feed-section{display:none;width:100%;max-width:600px;animation:fadeIn .4s ease}
+    h1,h2{text-align:center;color:var(--text)}
+    .input,.btn,#search-bar{width:100%;padding:12px 14px;margin-top:12px;border:1px solid var(--border);border-radius:8px;font-size:15px}
+    .btn{background:var(--primary);color:#fff;border:none;border-radius:9999px;cursor:pointer}
+    .btn:hover{background:#0d8de1}
+    .tweet{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 20px;margin-bottom:16px}
+    .tweet-user{font-weight:bold}
+    .tweet-time{font-size:12px;color:var(--subtext)}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
   </style>
 </head>
 <body>
   <!-- 로그인 / 회원가입 -->
   <section id="auth-section">
     <h1 id="auth-title">로그인</h1>
-    <input id="auth-id" class="input" type="text" placeholder="아이디" />
+    <input id="auth-id" class="input" placeholder="아이디" />
     <input id="auth-pw" class="input" type="password" placeholder="비밀번호" />
     <button id="auth-btn" class="btn">로그인</button>
-    <p id="switch-msg" style="text-align:center;margin-top:16px;">
-      계정이 없으신가요? <span id="switch-link" style="color:var(--primary);cursor:pointer;">회원가입</span>
-    </p>
+    <p id="switch-msg" style="text-align:center;margin-top:16px;">계정이 없으신가요? <span id="switch-link" style="color:var(--primary);cursor:pointer">회원가입</span></p>
   </section>
 
   <!-- 관심사 입력 -->
   <section id="interest-section" style="display:none;">
     <h2>관심사를 입력하세요</h2>
-    <input id="interest-input" class="input" type="text" placeholder="예: 블록체인, 축구, K-드라마" />
+    <input id="interest-input" class="input" placeholder="예: 블록체인, 축구, K-드라마" />
     <button id="interest-btn" class="btn">피드로 이동</button>
   </section>
 
-  <!-- 트위터 스타일 피드 -->
+  <!-- 피드 -->
   <section id="feed-section">
-    <input id="search-bar" type="text" placeholder="검색어를 입력하고 Enter" />
+    <input id="search-bar" placeholder="검색어를 입력하고 Enter" />
     <div id="tweets"></div>
   </section>
 
 <script>
-// ================= 상태 =================
-let isLoginMode = true;
-let userInterest = "";
+// ===== 상태 =====
+let isLogin=true,userInterest="";
 
-// 요소 참조
-const authSection = document.getElementById("auth-section");
-const authTitle   = document.getElementById("auth-title");
-const authBtn     = document.getElementById("auth-btn");
-const switchMsg   = document.getElementById("switch-msg");
-let   switchLink  = document.getElementById("switch-link");
-const authId      = document.getElementById("auth-id");
-const authPw      = document.getElementById("auth-pw");
+const authS=document.getElementById("auth-section"),authT=document.getElementById("auth-title"),authB=document.getElementById("auth-btn"),switchM=document.getElementById("switch-msg");
+let switchL=document.getElementById("switch-link");
+const authId=document.getElementById("auth-id"),authPw=document.getElementById("auth-pw");
 
-const interestSection = document.getElementById("interest-section");
-const interestInput   = document.getElementById("interest-input");
-const interestBtn     = document.getElementById("interest-btn");
+const interestS=document.getElementById("interest-section"),interestI=document.getElementById("interest-input"),interestB=document.getElementById("interest-btn");
+const feedS=document.getElementById("feed-section"),tweets=document.getElementById("tweets"),search=document.getElementById("search-bar");
 
-const feedSection = document.getElementById("feed-section");
-const tweetsDiv   = document.getElementById("tweets");
-const searchBar   = document.getElementById("search-bar");
-
-// ================= 공통 함수 =================
-function refreshAuthBox(){
-  authTitle.textContent = isLoginMode?"로그인":"회원가입";
-  authBtn.textContent   = isLoginMode?"로그인":"회원가입";
-  switchMsg.innerHTML   = isLoginMode?
-    "계정이 없으신가요? <span id='switch-link' style='color:var(--primary);cursor:pointer;'>회원가입</span>" :
-    "이미 계정이 있으신가요? <span id='switch-link' style='color:var(--primary);cursor:pointer;'>로그인</span>";
-  switchLink = document.getElementById("switch-link");
-  switchLink.addEventListener("click",()=>{isLoginMode=!isLoginMode;refreshAuthBox();});
+function refreshAuth(){
+  authT.textContent=isLogin?"로그인":"회원가입";
+  authB.textContent=isLogin?"로그인":"회원가입";
+  switchM.innerHTML=isLogin?"계정이 없으신가요? <span id='switch-link' style='color:var(--primary);cursor:pointer'>회원가입</span>":"이미 계정이 있으신가요? <span id='switch-link' style='color:var(--primary);cursor:pointer'>로그인</span>";
+  switchL=document.getElementById("switch-link");
+  switchL.onclick=()=>{isLogin=!isLogin;refreshAuth();};
 }
-// 최초 리스너
-switchLink.addEventListener("click",()=>{isLoginMode=!isLoginMode;refreshAuthBox();});
 
-// 로그인 / 회원가입 완료
-authBtn.addEventListener("click",()=>{
-  const id=authId.value.trim();
-  const pw=authPw.value.trim();
-  if(!id||!pw){alert("아이디와 비밀번호를 입력하세요.");return;}
-  alert(`${id} 님, ${isLoginMode?"로그인":"회원가입"}이 완료되었습니다.`);
-  authSection.style.display="none";
-  interestSection.style.display="block";
-});
+switchL.onclick=()=>{isLogin=!isLogin;refreshAuth();};
 
-// 관심사 입력 완료
-interestBtn.addEventListener("click",()=>{
-  const interest=interestInput.value.trim();
-  if(!interest){alert("관심사를 입력해주세요.");return;}
-  userInterest=interest;
-  interestSection.style.display="none";
-  feedSection.style.display="block";
-  tweetsDiv.innerHTML="";
-  generateTweet(userInterest);
-});
+authB.onclick=()=>{
+  if(!authId.value.trim()||!authPw.value.trim()){alert("아이디와 비밀번호를 입력하세요.");return;}
+  alert(`${authId.value} 님, ${isLogin?"로그인":"회원가입"}이 완료되었습니다.`);
+  authS.style.display="none";interestS.style.display="block";
+};
 
-// 검색창 엔터
-searchBar.addEventListener("keyup",e=>{
-  if(e.key==="Enter"){
-    const q=searchBar.value.trim();
-    if(q){generateTweet(q,true);searchBar.value="";}
-  }
-});
+interestB.onclick=()=>{
+  if(!interestI.value.trim()){alert("관심사를 입력해주세요.");return;}
+  userInterest=interestI.value.trim();
+  interestS.style.display="none";feedS.style.display="block";tweets.innerHTML="";
+  postTweet(userInterest);
+};
 
-// ================= BLOOMZ API 호출 =================
-const HF_API_KEY = "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"; // 학습용 토큰 (노출 주의)
-async function fetchFromBloomz(prompt){
+search.addEventListener("keyup",e=>{if(e.key==="Enter"&&search.value.trim()){postTweet(search.value.trim(),true);search.value="";}});
+
+// ===== Hugging Face BLOOMZ 560M 호출 =====
+const HF_KEY="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";
+const MODEL_URL="https://api-inference.huggingface.co/models/bigscience/bloomz-560m";
+async function callBloomz(prompt){
   try{
-    const res = await fetch("https://api-inference.huggingface.co/models/bigscience/bloomz",{
-      method:"POST",
-      headers:{
-        "Authorization":`Bearer ${HF_API_KEY}`,
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({inputs:prompt})
-    });
-    if(!res.ok){const t=await res.text();console.error("BLOOMZ Error",t);return "[BLOOMZ 호출 오류]";}
-    const data=await res.json();
-    console.log("BLOOMZ 응답",data);
-    return data?.[0]?.generated_text || "[응답 없음]";
-  }catch(err){console.error(err);return "[BLOOMZ 호출 오류]";}
+    const r=await fetch(MODEL_URL,{method:"POST",headers:{"Authorization":`Bearer ${HF_KEY}","Content-Type":"application/json"},body:JSON.stringify({inputs:prompt,max_new_tokens:60})});
+    if(!r.ok){console.error("BLOOMZ HTTP",r.status);return"[BLOOMZ 호출 오류]";}
+    const d=await r.json();console.log("HF 응답",d);
+    return d?.[0]?.generated_text||"[응답 없음]";
+  }catch(e){console.error(e);return"[BLOOMZ 호출 오류]";}
 }
 
-// ================= 트윗 생성 =================
-async function generateTweet(topic,isSearch=false){
-  const el=document.createElement("div");
-  el.className="tweet";
-  el.innerHTML=`<p class="tweet-user">BLOOMZ AI</p><p class="tweet-content">생성 중...</p><p class="tweet-time">방금</p>`;
-  isSearch?tweetsDiv.prepend(el):tweetsDiv.appendChild(el);
-
-  const content = await fetchFromBloomz(`${topic}에 대한 자극적인 가짜 뉴스 스타일 문장을 작성해줘. 한국어로.`);
-  el.querySelector(".tweet-content").textContent = content;
+async function postTweet(topic,prepend=false){
+  const el=document.createElement("div");el.className="tweet";el.innerHTML=`<p class="tweet-user">BLOOMZ AI</p><p class="tweet-content">생성 중...</p><p class="tweet-time">방금</p>`;
+  prepend?tweets.prepend(el):tweets.appendChild(el);
+  const txt=await callBloomz(`${topic}에 대한 자극적인 가짜 뉴스 스타일 문장을 작성해줘. 한국어로.`);
+  el.querySelector(".tweet-content").textContent=txt;
 }
 </script>
 </body>
