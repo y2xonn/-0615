@@ -5,67 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>편향 피드 체험</title>
   <style>
-    :root {
-      --pos: #d4edda;
-      --neg: #f8d7da;
-      --border: #ccc;
-      --primary: #1d9bf0;
-    }
-    * {
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-    body {
-      background: #f4f6f8;
-      padding: 40px;
-      display: flex;
-      justify-content: center;
-    }
-    .container {
-      width: 100%;
-      max-width: 760px;
-    }
-    select, button {
-      padding: 10px;
-      font-size: 15px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-    }
-    button.generate {
-      background: var(--primary);
-      color: white;
-      margin-left: 8px;
-      border: none;
-      cursor: pointer;
-    }
-    .feed-item {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 20px;
-      position: relative;
-    }
-    .subtext {
-      font-size: 13px;
-      color: #555;
-      margin-top: 6px;
-    }
-    .tag-buttons {
-      position: absolute;
-      top: 16px;
-      right: 20px;
-    }
-    .tag-button {
-      padding: 6px 10px;
-      margin-left: 6px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .positive { background: var(--pos); }
-    .negative { background: var(--neg); }
-    .hidden { display: none; }
+    :root {--pos:#d4edda;--neg:#f8d7da;--border:#ccc;--primary:#1d9bf0}
+    *{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+    body{background:#f4f6f8;padding:40px;margin:0;display:flex;justify-content:center}
+    .container{width:100%;max-width:760px}
+    select,button{padding:10px;font-size:15px;border:1px solid var(--border);border-radius:6px}
+    button.generate{background:var(--primary);color:#fff;margin-left:8px;border:none;cursor:pointer}
+    .feed-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;position:relative}
+    .subtext{font-size:13px;color:#555;margin-top:6px}
+    .tag-buttons{position:absolute;top:16px;right:20px}
+    .tag-button{padding:6px 10px;margin-left:6px;border:1px solid var(--border);border-radius:6px;cursor:pointer}
+    .positive{background:var(--pos)}
+    .negative{background:var(--neg)}
+    .hidden{display:none}
   </style>
 </head>
 <body>
@@ -75,182 +27,183 @@
     <select id="topic-select">
       <option value="환경">환경</option>
       <option value="AI">AI</option>
+      <option value="SNS">SNS</option>
       <option value="연예인">연예인 A</option>
     </select>
-    <button class="generate" onclick="generateFeed()">피드 생성</button>
+    <button id="generate-btn" class="generate">피드 생성</button>
 
-    <div id="feed-container" style="margin-top: 32px;"></div>
-    <button id="result-btn" class="generate hidden" onclick="showResult()">결과 보기</button>
+    <div id="feed-container" style="margin-top:32px"></div>
+    <button id="result-btn" class="generate hidden">결과 보기</button>
 
     <div id="result-summary" class="hidden">
       <h2>결과 요약</h2>
       <p id="real-ratio"></p>
       <p id="user-ratio"></p>
     </div>
+
+    <div id="explanation" class="hidden" style="margin-top:40px;background:#fff;padding:24px;border-radius:10px;border:1px solid #ccc">
+      <h2>알고리즘 편향 & 필터 버블</h2>
+      <h3>🧠 알고리즘 편향</h3>
+      <p>알고리즘이 학습 데이터와 설계자의 편견을 그대로 반영해 특정 방향의 결과만 제공하는 현상입니다.</p>
+      <h3>🔍 필터 버블</h3>
+      <p>사용자가 선호한 정보만 반복 노출돼 다른 관점을 접하기 어려워지는 정보의 울타리입니다.</p>
+      <h3>⚠️ 문제점</h3>
+      <ul>
+        <li>비판적 사고, 다양성 저하</li>
+        <li>허위 정보·극단적 콘텐츠 확산</li>
+        <li>사회적 분열·편견 강화</li>
+      </ul>
+      <h3>✅ 해결 방법</h3>
+      <ul>
+        <li>의도적으로 다양한 출처 탐색</li>
+        <li>반대 의견·팩트체크 확인</li>
+        <li>알고리즘 설정 및 기록 주기적 초기화</li>
+        <li>플랫폼의 투명성 요구</li>
+      </ul>
+    </div>
   </div>
 
 <script>
-const FEEDS = {
-  '환경': {
-    positive: [
-      ['탄소 중립 실현 선언', '정부가 2050년까지 탄소 중립 달성 계획 발표'],
-      ['국내 재생에너지 발전 확대', '태양광·풍력 발전소 신규 건설 증가'],
-      ['환경교육 강화 정책 시행', '학생 대상 기후 교육 확대 중'],
-      ['해양 쓰레기 감소 프로젝트 성과', '1년간 수거량 30% 이상 증가'],
-      ['국민 환경의식 조사 결과 상승', '환경 중요성에 대한 인식 확대'],
-      ['전기차 보급률 역대 최고', '친환경 교통수단 전환 가속'],
-      ['지속가능한 도시 인증 획득', '국제 도시환경 평가 지표 기준 통과'],
-      ['기업 ESG 경영 선언 증가', '환경·사회책임 투자 확대'],
-      ['에너지 소비 효율 캠페인 성과', '국민 참여율 증가로 전력 절감 효과'],
-      ['환경 보호 공익 광고 인기', 'SNS 공유로 캠페인 참여 확산']
+const FEEDS={
+  '환경':{
+    positive:[
+      ['탄소 중립 실현 선언','정부가 2050년까지 탄소 중립 달성 계획 발표'],
+      ['국내 재생에너지 발전 확대','태양광·풍력 발전소 신규 건설 증가'],
+      ['환경교육 강화 정책 시행','학생 대상 기후 교육 확대 중'],
+      ['해양 쓰레기 감소 프로젝트 성과','1년간 수거량 30% 이상 증가'],
+      ['국민 환경의식 조사 결과 상승','환경 중요성에 대한 인식 확대'],
+      ['전기차 보급률 역대 최고','친환경 교통수단 전환 가속'],
+      ['지속가능한 도시 인증 획득','국제 도시환경 평가 지표 통과'],
+      ['기업 ESG 경영 선언 증가','환경·사회책임 투자 확대'],
+      ['에너지 효율 캠페인 성과','전력 절감 효과로 비용 절약'],
+      ['환경 보호 공익 광고 인기','SNS로 캠페인 참여 확산']
     ],
-    negative: [
-      ['미세먼지 전국 비상저감조치 시행', '건강 우려로 외출 자제 권고'],
-      ['산림 훼손 논란 지속', '개발 사업으로 생태계 파괴 우려'],
-      ['플라스틱 소비 증가', '1인당 연간 소비량 세계 최고 수준'],
-      ['하천 수질 오염 악화', '농업·공장 폐수 방류 문제 대두'],
-      ['기후변화로 작물 생산량 감소', '식량 안정성 위협'],
-      ['불법 폐기물 방치 논란', '행정 공백으로 인한 처리 지연'],
-      ['조류 대발생으로 생태계 교란', '강 하류 수질 악화'],
-      ['대기 오염 기준 초과 지역 증가', '산업지역 중심 초미세먼지 누적'],
-      ['환경 단체 예산 축소', '비영리단체 활동 위축 우려'],
-      ['친환경 인증제도 신뢰도 하락', '불투명한 인증 기준 문제']
+    negative:[
+      ['미세먼지 비상조치 발령','건강 우려로 외출 자제 권고'],
+      ['산림 훼손 논란 지속','개발 사업으로 생태계 파괴 우려'],
+      ['플라스틱 소비 증가','1인당 소비량 세계 최고 수준'],
+      ['하천 수질 오염 악화','농업·공장 폐수 방류 문제'],
+      ['기후변화로 작물 생산량 감소','식량 안정성 위협'],
+      ['불법 폐기물 방치 논란','행정 공백으로 처리 지연'],
+      ['조류 대발생으로 생태계 교란','강 하류 수질 악화'],
+      ['대기 오염 기준 초과 지역 증가','산업지역 초미세먼지 누적'],
+      ['환경 단체 예산 축소','활동 위축 우려'],
+      ['친환경 인증제도 신뢰도 하락','불투명한 기준 문제']
     ]
   },
-  'AI': {
-    positive: [
-      ['AI 번역 기술 향상', '실시간 통역 정확도 98% 달성'],
-      ['AI 자율주행차 테스트 성공', '복잡한 도시도로에서도 안정 주행'],
-      ['의료 AI, 조기 진단 사례 증가', '폐암·당뇨 등 조기 발견에 기여'],
-      ['AI 챗봇으로 고객 만족도 상승', '기업 상담 효율 두 배 증가'],
-      ['AI 화재 경보 시스템 도입', '센서 기반 사전 감지 가능'],
-      ['AI 기반 예술작품 전시회 열려', '창작 영역 확장 논의'],
-      ['AI 기술로 농작물 수확량 예측 향상', '농가 수익 증대 기대'],
-      ['AI 도우미로 노인 복지 향상', '음성 인식 기반 생활 지원'],
-      ['스마트 시티 AI 통합 운영 개시', '교통·환경 자동 관리 시작'],
-      ['AI 윤리 기준 수립 논의 본격화', '책임 있는 개발 강조']
+  'AI':{
+    positive:[
+      ['AI 번역 정확도 98%','실시간 통역 지원'],
+      ['자율주행차 도시 주행 성공','교통사고 감소 기대'],
+      ['AI 조기 진단 정확도 향상','암·당뇨 등 발견'],
+      ['AI 챗봇 고객 만족↑','상담 효율 두 배'],
+      ['AI 화재 예측 시스템 도입','사전 경고 가능'],
+      ['AI 예술작품 전시회','창작 영역 확장'],
+      ['스마트 농업 수확량 증대','AI 예측 모델 활용'],
+      ['AI 노인 돌봄 서비스','음성 인식 지원'],
+      ['스마트 시티 통합 운영','교통·환경 자동 관리'],
+      ['AI 윤리 가이드라인 제정','책임 있는 개발 강조']
     ],
-    negative: [
-      ['AI 면접 공정성 논란', '차별 가능성 지적 이어져'],
-      ['AI 작곡 표절 문제 제기', '기존 음악과 유사한 구조 검출'],
-      ['AI 악용 스팸 전화 급증', '보이스봇 통한 금융사기 시도'],
-      ['딥페이크 영상 문제 확대', '정치·연예 분야 악용 사례 발생'],
-      ['AI 도입으로 일자리 감소 우려', '단순 노동자 대상 영향 클 듯'],
-      ['AI 감시 시스템 사생활 침해 우려', '공공장소 얼굴 인식 논란'],
-      ['AI 추천 시스템의 편향 문제', '일부 콘텐츠 노출 집중'],
-      ['AI 오류로 의료 오진 사례 발생', '데이터 학습 문제 지적'],
-      ['AI 관련 윤리 규제 미비', '해외와 비교해 기준 부족'],
-      ['AI 허위뉴스 생성 우려 증가', '신뢰할 수 없는 콘텐츠 확산']
+    negative:[
+      ['AI 면접 차별 논란','편향 데이터 문제'],
+      ['딥페이크 범죄 증가','허위 영상 유포'],
+      ['AI 스팸 전화 급증','보이스봇 금융사기'],
+      ['AI 일자리 대체 우려','단순 업무 자동화'],
+      ['AI 감시로 사생활 침해','얼굴 인식 논란'],
+      ['추천 알고리즘 편향','극단 콘텐츠 노출'],
+      ['AI 의료 오진 사례','데이터 오류 지적'],
+      ['윤리 규제 미비','국제 기준 부족'],
+      ['AI 허위뉴스 확산','검증 어려움'],
+      ['AI 해킹 공격 사용','보안 위협 증가']
     ]
   },
-  '연예인': {
-    positive: [
-      ['연예인 A, 기부 릴레이 참여', '10억 원 기부로 팬들 감동'],
-      ['연예인 A, 봉사활동 사진 공개', '지역 아동과 따뜻한 하루 보내'],
-      ['연예인 A, 국제 시상식 수상', '한국 배우 최초의 쾌거'],
-      ['연예인 A, 반려동물 보호 캠페인 참여', '입양 장려 영상 공개'],
-      ['연예인 A, 뮤지컬 주연 도전', '관객 호평 이어져'],
-      ['연예인 A, 팬들과 화상 팬미팅 진행', '전 세계 팬들 열광'],
-      ['연예인 A, 도서 출간', '자서전 판매 1위 등극'],
-      ['연예인 A, SNS로 코로나 응원 메시지 전달', '연예인 연대 행보'],
-      ['연예인 A, 문화재 지킴이 위촉', '역사 교육 활동 전개'],
-      ['연예인 A, 청소년 멘토링 캠페인 참여', '꿈을 응원하는 메시지 전달']
+  'SNS':{
+    positive:[
+      ['SNS 기부 챌린지 인기','온라인 참여로 기부문화 확산'],
+      ['SNS 사회 문제 공론화','청소년 환경 캠페인 트렌드'],
+      ['SNS로 소상공인 홍보','매출 2배 상승'],
+      ['SNS 창작자 해외 진출','글로벌 팬 확보'],
+      ['새 친구 추천 기능 개선','사용자 만족도 상승'],
+      ['SNS에서 예술가 작품 인기','창작자 수익 확대'],
+      ['SNS 감정 분석 서비스','정신건강 지원 기대'],
+      ['가짜뉴스 필터링 강화','허위 정보 감소'],
+      ['SNS 자원봉사 캠페인','참여자 전국 확산'],
+      ['AI 필터로 유해 콘텐츠 차단','안전한 환경 조성']
     ],
-    negative: [
-      ['연예인 A, 사생활 논란 재점화', '과거 발언 논란 다시 화제'],
-      ['연예인 A, 탈세 의혹 보도', '소속사 부인에도 여론 악화'],
-      ['연예인 A, 방송 중 막말 논란', '시청자 항의 잇따라'],
-      ['연예인 A, 팬과의 갈등 노출', '공개 사과로 수습 시도'],
-      ['연예인 A, 스태프 폭언 의혹 제기', '촬영장 내 갑질 논란'],
-      ['연예인 A, 불법 주차 사진 논란', 'SNS에 공개되며 확산'],
-      ['연예인 A, 무단 광고 계약 위반 논란', '피해 업체 소송 검토'],
-      ['연예인 A, 연기력 논란 재점화', '신작에서 혹평 이어져'],
-      ['연예인 A, 뒷광고 사실 드러나', '진정성 논란 커져'],
-      ['연예인 A, SNS 허위사실 유포 의혹', '악성 루머 확산 우려']
+    negative:[
+      ['SNS 중독 청소년 증가','수면 부족·학업 저하'],
+      ['SNS 허위정보 피해 급증','가짜뉴스 속출'],
+      ['사이버불링 심각','청소년 정신건강 위협'],
+      ['개인정보 유출 사고','수십만 명 피해'],
+      ['챌린지 따라하다 부상','무리한 행동 사고'],
+      ['과시 소비 문화 확산','10대 소비 왜곡'],
+      ['알고리즘 편향 심화','확증편향 강화'],
+      ['악성 댓글 스트레스','자존감 하락'],
+      ['SNS 계정 해킹 증가','보안 강화 요구'],
+      ['불법 광고·스팸 확산','사용자 불편']
+    ]
+  },
+  '연예인':{
+    positive:[
+      ['연예인 A, 10억 기부','팬들 감동 물결'],
+      ['연예인 A, 봉사활동 공개','아동과 따뜻한 하루'],
+      ['국제 시상식 수상','한국 배우 최초 쾌거'],
+      ['반려동물 캠페인 참여','입양 장려 영상'],
+      ['뮤지컬 주연 도전','관객 호평'],
+      ['화상 팬미팅 진행','글로벌 팬 열광'],
+      ['자서전 판매 1위','인세 기부 약속'],
+      ['코로나 응원 메시지','연예인 연대 실천'],
+      ['문화재 지킴이 위촉','역사 교육 활동'],
+      ['청소년 멘토링 참여','꿈 응원 메시지']
+    ],
+    negative:[
+      ['사생활 논란 재점화','과거 발언 재조명'],
+      ['탈세 의혹 보도','소속사 부인'],
+      ['방송 막말 논란','시청자 항의'],
+      ['팬과 갈등 공개','사과문 발표'],
+      ['스태프 폭언 의혹','갑질 논란'],
+      ['불법 주차 사진 확산','비판 이어져'],
+      ['광고 계약 위반','피해 업체 소송'],
+      ['연기력 혹평 재점화','신작 논란'],
+      ['뒷광고 사실 드러나','진정성 논란'],
+      ['허위사실 유포 의혹','악성 루머 확산']
     ]
   }
 };
 
-let userPos = 0, userNeg = 0, truePos = 0, trueNeg = 0;
+let userPos=0,userNeg=0,truePos=0,trueNeg=0;
+const $=id=>document.getElementById(id);
+$('#generate-btn').addEventListener('click',generateFeed);
+$('#result-btn').addEventListener('click',showResult);
 
-function $(id) {
-  return document.getElementById(id);
-}
-
-function generateFeed() {
-  const topic = $('topic-select').value;
-  const pool = FEEDS[topic];
-  const mixed = [...pool.positive.map(x => ({ ...x, type: 'positive' })), ...pool.negative.map(x => ({ ...x, type: 'negative' }))];
-  mixed.sort(() => Math.random() - 0.5);
-  const picked = mixed.slice(0, 10);
-  truePos = picked.filter(x => x.type === 'positive').length;
-  trueNeg = 10 - truePos;
-
-  const container = $('feed-container');
-  container.innerHTML = '';
-  userPos = userNeg = 0;
-
-  picked.forEach((item, i) => {
-    const div = document.createElement('div');
-    div.className = 'feed-item';
-    div.dataset.state = 'none';
-
-    const title = document.createElement('p');
-    title.textContent = ${i + 1}. ${item[0]};
-
-    const desc = document.createElement('div');
-    desc.className = 'subtext';
-    desc.textContent = item[1];
-
-    const btns = document.createElement('div');
-    btns.className = 'tag-buttons';
-
-    ['긍정', '부정'].forEach(label => {
-      const b = document.createElement('button');
-      b.textContent = label;
-      b.className = 'tag-button';
-      b.onclick = () => mark(div, label === '긍정' ? 'positive' : 'negative');
-      btns.appendChild(b);
-    });
-
-    div.appendChild(title);
-    div.appendChild(desc);
-    div.appendChild(btns);
-    container.appendChild(div);
+function generateFeed(){
+  const topic=$('topic-select').value;
+  const pool=FEEDS[topic];
+  const mixed=[...pool.positive.map(([t,d])=>({title:t,desc:d,type:'positive'})),...pool.negative.map(([t,d])=>({title:t,desc:d,type:'negative'}))].sort(()=>Math.random()-0.5);
+  const picked=mixed.slice(0,10);
+  truePos=picked.filter(i=>i.type==='positive').length;
+  trueNeg=10-truePos;
+  userPos=userNeg=0;
+  const cont=$('feed-container');
+  cont.innerHTML='';
+  picked.forEach((it,i)=>{
+    const div=document.createElement('div');div.className='feed-item';div.dataset.state='none';
+    div.innerHTML=`<p>${i+1}. ${it.title}</p><div class="subtext">${it.desc}</div>`;
+    const wrap=document.createElement('div');wrap.className='tag-buttons';
+    ['positive','negative'].forEach(type=>{
+      const b=document.createElement('button');b.textContent=type==='positive'?'긍정':'부정';b.className='tag-button';b.onclick=()=>mark(div,type);wrap.appendChild(b);});
+    div.appendChild(wrap);cont.appendChild(div);
   });
-
   $('result-btn').classList.remove('hidden');
   $('result-summary').classList.add('hidden');
+  $('explanation').classList.add('hidden');
 }
-
-function mark(div, state) {
-  const prev = div.dataset.state;
-  if (prev === state) return;
-  if (prev === 'positive') userPos--;
-  if (prev === 'negative') userNeg--;
-
-  if (state === 'positive') {
-    userPos++;
-    div.classList.add('positive');
-    div.classList.remove('negative');
-  } else {
-    userNeg++;
-    div.classList.add('negative');
-    div.classList.remove('positive');
-  }
-  div.dataset.state = state;
+function mark(div,state){
+  const prev=div.dataset.state;
+  if(prev===state)return;
+  if(prev==='positive')userPos--;if(prev==='negative')userNeg--;
+  if(state==='positive'){userPos++;div.classList.add('positive');div.classList.remove('negative');}
+  else{userNeg++;div.classList.add('negative');div.classList.remove('positive');}
+  div.dataset.state=state;
 }
-
-function showResult() {
-  if (userPos + userNeg < 10) {
-    alert('모든 기사에 라벨을 선택해주세요.');
-    return;
-  }
-  $('real-ratio').textContent = 실제 비율: 긍정 ${truePos} / 부정 ${trueNeg};
-  $('user-ratio').textContent = 당신의 라벨: 긍정 ${userPos} / 부정 ${userNeg};
-  $('result-summary').classList.remove('hidden');
-  $('result-summary').scrollIntoView({ behavior: 'smooth' });
-}
-</script>
-</body>
-</html>
+function show
