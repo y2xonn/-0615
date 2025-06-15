@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI 맞춤형 SNS (FLAN-T5-Small)</title>
+  <title>AI 맞춤형 SNS (Falcon 모델)</title>
   <style>
     :root{--primary:#1da1f2;--bg:#f5f8fa;--card:#fff;--border:#e6ecf0;--text:#14171a;--subtext:#657786}
     *{box-sizing:border-box}
@@ -75,7 +75,7 @@ interestB.onclick=()=>{
 search.addEventListener("keyup",e=>{if(e.key==="Enter"&&search.value.trim()){postTweet(search.value.trim(),true);search.value="";}});
 
 const HF_KEY="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";
-const MODEL_URL="https://api-inference.huggingface.co/models/google/flan-t5-small";
+const MODEL_URL="https://api-inference.huggingface.co/models/tiiuae/falcon-7b-instruct";
 async function callModel(prompt){
   try{
     const response = await fetch(MODEL_URL, {
@@ -101,9 +101,9 @@ async function callModel(prompt){
 async function postTweet(topic,prepend=false){
   const el=document.createElement("div");
   el.className="tweet";
-  el.innerHTML=`<p class="tweet-user">FLAN AI</p><p class="tweet-content">생성 중...</p><p class="tweet-time">방금</p>`;
+  el.innerHTML=`<p class="tweet-user">Falcon AI</p><p class="tweet-content">생성 중...</p><p class="tweet-time">방금</p>`;
   prepend?tweets.prepend(el):tweets.appendChild(el);
-  const result = await callModel(`Write a sensational fake news headline in Korean about: ${topic}`);
+  const result = await callModel(`Write a short, sensational fake news post in Korean about: ${topic}. Please respond in Korean.`);
   el.querySelector(".tweet-content").textContent = result;
 }
 </script>
