@@ -1,23 +1,71 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>편향 피드 체험</title>
   <style>
-    body {font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 24px; display: flex; justify-content: center;}
-    .container {width: 100%; max-width: 780px;}
-    h1, h2 {margin-bottom: 20px; color: #333;}
-    select, button, textarea {padding: 10px; font-size: 15px; border: 1px solid #ccc; border-radius: 6px;}
-    button.action {background: #1d9bf0; color: #fff; border: none; cursor: pointer; margin-left: 8px;}
-    .feed-item {background: #fff; border: 1px solid #ccc; border-radius: 10px; padding: 18px; margin-bottom: 14px; position: relative;}
-    .subtext {font-size: 13px; color: #666; margin-top: 6px;}
-    .tag-buttons {position: absolute; top: 18px; right: 18px;}
-    .tag-button {padding: 6px 10px; margin-left: 6px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer;}
-    .positive {background: #d4edda !important;}
-    .negative {background: #f8d7da !important;}
-    .hidden {display: none;}
-    .explain, .survey {background: #fff; border: 1px solid #ccc; border-radius: 10px; padding: 20px; margin-top: 30px;}
+    :root {
+      --pos: #d4edda;
+      --neg: #f8d7da;
+      --border: #ccc;
+      --primary: #1d9bf0;
+    }
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      background: #f4f6f8;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 760px;
+    }
+    select, button {
+      padding: 10px;
+      font-size: 15px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+    button.generate {
+      background: var(--primary);
+      color: white;
+      margin-left: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    .feed-item {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .subtext {
+      font-size: 13px;
+      color: #555;
+      margin-top: 6px;
+    }
+    .tag-buttons {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+    }
+    .tag-button {
+      padding: 6px 10px;
+      margin-left: 6px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .positive { background: var(--pos); }
+    .negative { background: var(--neg); }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
@@ -29,161 +77,179 @@
       <option value="AI">AI</option>
       <option value="연예인">연예인 A</option>
     </select>
-    <button id="generate" class="action">피드 생성</button>
+    <button class="generate" onclick="generateFeed()">피드 생성</button>
 
-    <div id="feed"></div>
-    <button id="result-btn" class="action hidden">결과 보기</button>
+    <div id="feed-container" style="margin-top: 32px;"></div>
+    <button id="result-btn" class="generate hidden" onclick="showResult()">결과 보기</button>
 
-    <div id="summary" class="hidden">
+    <div id="result-summary" class="hidden">
       <h2>결과 요약</h2>
-      <p id="real"></p>
-      <p id="user"></p>
-      <button onclick="showExplanation()" class="action">다음으로</button>
-    </div>
-
-    <div id="explanation" class="explain hidden">
-      <h2>필터버블과 알고리즘 편향이란?</h2>
-      <p>필터버블은 알고리즘이 사용자의 관심사에 맞춘 콘텐츠만 보여줘서 다양한 시각을 접하기 어렵게 만드는 현상입니다. 알고리즘 편향은 특정 방향의 정보만 더 자주 노출되는 현상으로, 사용자 인식에 영향을 줄 수 있습니다.</p>
-      <h3>이런 문제를 해결하려면?</h3>
-      <ul>
-        <li>다양한 출처에서 정보를 확인하기</li>
-        <li>자신과 다른 시각도 고려하기</li>
-        <li>자동 추천에만 의존하지 않기</li>
-      </ul>
-      <button onclick="showSurvey()" class="action">설문 참여하기</button>
-    </div>
-
-    <div id="survey" class="survey hidden">
-      <h2>체험 피드백</h2>
-      <label for="thoughts">이번 체험에서 느낀 점을 자유롭게 적어주세요:</label><br/>
-      <textarea id="thoughts" rows="5" style="width: 100%; margin-top: 10px;"></textarea><br/>
-      <button onclick="submitSurvey()" class="action">제출</button>
+      <p id="real-ratio"></p>
+      <p id="user-ratio"></p>
     </div>
   </div>
 
 <script>
 const FEEDS = {
   '환경': {
-    positive: [...Array(10)].map((_, i) => [`탄소중립 긍정 기사 ${i + 1}`, `친환경 정책 성과 설명 ${i + 1}`]),
-    negative: [...Array(10)].map((_, i) => [`기후위기 부정 기사 ${i + 1}`, `환경 위협 설명 ${i + 1}`])
+    positive: [
+      ['탄소 중립 실현 선언', '정부가 2050년까지 탄소 중립 달성 계획 발표'],
+      ['국내 재생에너지 발전 확대', '태양광·풍력 발전소 신규 건설 증가'],
+      ['환경교육 강화 정책 시행', '학생 대상 기후 교육 확대 중'],
+      ['해양 쓰레기 감소 프로젝트 성과', '1년간 수거량 30% 이상 증가'],
+      ['국민 환경의식 조사 결과 상승', '환경 중요성에 대한 인식 확대'],
+      ['전기차 보급률 역대 최고', '친환경 교통수단 전환 가속'],
+      ['지속가능한 도시 인증 획득', '국제 도시환경 평가 지표 기준 통과'],
+      ['기업 ESG 경영 선언 증가', '환경·사회책임 투자 확대'],
+      ['에너지 소비 효율 캠페인 성과', '국민 참여율 증가로 전력 절감 효과'],
+      ['환경 보호 공익 광고 인기', 'SNS 공유로 캠페인 참여 확산']
+    ],
+    negative: [
+      ['미세먼지 전국 비상저감조치 시행', '건강 우려로 외출 자제 권고'],
+      ['산림 훼손 논란 지속', '개발 사업으로 생태계 파괴 우려'],
+      ['플라스틱 소비 증가', '1인당 연간 소비량 세계 최고 수준'],
+      ['하천 수질 오염 악화', '농업·공장 폐수 방류 문제 대두'],
+      ['기후변화로 작물 생산량 감소', '식량 안정성 위협'],
+      ['불법 폐기물 방치 논란', '행정 공백으로 인한 처리 지연'],
+      ['조류 대발생으로 생태계 교란', '강 하류 수질 악화'],
+      ['대기 오염 기준 초과 지역 증가', '산업지역 중심 초미세먼지 누적'],
+      ['환경 단체 예산 축소', '비영리단체 활동 위축 우려'],
+      ['친환경 인증제도 신뢰도 하락', '불투명한 인증 기준 문제']
+    ]
   },
   'AI': {
-    positive: [...Array(10)].map((_, i) => [`AI 혁신 긍정 기사 ${i + 1}`, `AI 장점 설명 ${i + 1}`]),
-    negative: [...Array(10)].map((_, i) => [`AI 부작용 기사 ${i + 1}`, `AI 우려 설명 ${i + 1}`])
+    positive: [
+      ['AI 번역 기술 향상', '실시간 통역 정확도 98% 달성'],
+      ['AI 자율주행차 테스트 성공', '복잡한 도시도로에서도 안정 주행'],
+      ['의료 AI, 조기 진단 사례 증가', '폐암·당뇨 등 조기 발견에 기여'],
+      ['AI 챗봇으로 고객 만족도 상승', '기업 상담 효율 두 배 증가'],
+      ['AI 화재 경보 시스템 도입', '센서 기반 사전 감지 가능'],
+      ['AI 기반 예술작품 전시회 열려', '창작 영역 확장 논의'],
+      ['AI 기술로 농작물 수확량 예측 향상', '농가 수익 증대 기대'],
+      ['AI 도우미로 노인 복지 향상', '음성 인식 기반 생활 지원'],
+      ['스마트 시티 AI 통합 운영 개시', '교통·환경 자동 관리 시작'],
+      ['AI 윤리 기준 수립 논의 본격화', '책임 있는 개발 강조']
+    ],
+    negative: [
+      ['AI 면접 공정성 논란', '차별 가능성 지적 이어져'],
+      ['AI 작곡 표절 문제 제기', '기존 음악과 유사한 구조 검출'],
+      ['AI 악용 스팸 전화 급증', '보이스봇 통한 금융사기 시도'],
+      ['딥페이크 영상 문제 확대', '정치·연예 분야 악용 사례 발생'],
+      ['AI 도입으로 일자리 감소 우려', '단순 노동자 대상 영향 클 듯'],
+      ['AI 감시 시스템 사생활 침해 우려', '공공장소 얼굴 인식 논란'],
+      ['AI 추천 시스템의 편향 문제', '일부 콘텐츠 노출 집중'],
+      ['AI 오류로 의료 오진 사례 발생', '데이터 학습 문제 지적'],
+      ['AI 관련 윤리 규제 미비', '해외와 비교해 기준 부족'],
+      ['AI 허위뉴스 생성 우려 증가', '신뢰할 수 없는 콘텐츠 확산']
+    ]
   },
   '연예인': {
-    positive: [...Array(10)].map((_, i) => [`연예인 선행 기사 ${i + 1}`, `호감 행보 설명 ${i + 1}`]),
-    negative: [...Array(10)].map((_, i) => [`연예인 논란 기사 ${i + 1}`, `논란 상세 설명 ${i + 1}`])
+    positive: [
+      ['연예인 A, 기부 릴레이 참여', '10억 원 기부로 팬들 감동'],
+      ['연예인 A, 봉사활동 사진 공개', '지역 아동과 따뜻한 하루 보내'],
+      ['연예인 A, 국제 시상식 수상', '한국 배우 최초의 쾌거'],
+      ['연예인 A, 반려동물 보호 캠페인 참여', '입양 장려 영상 공개'],
+      ['연예인 A, 뮤지컬 주연 도전', '관객 호평 이어져'],
+      ['연예인 A, 팬들과 화상 팬미팅 진행', '전 세계 팬들 열광'],
+      ['연예인 A, 도서 출간', '자서전 판매 1위 등극'],
+      ['연예인 A, SNS로 코로나 응원 메시지 전달', '연예인 연대 행보'],
+      ['연예인 A, 문화재 지킴이 위촉', '역사 교육 활동 전개'],
+      ['연예인 A, 청소년 멘토링 캠페인 참여', '꿈을 응원하는 메시지 전달']
+    ],
+    negative: [
+      ['연예인 A, 사생활 논란 재점화', '과거 발언 논란 다시 화제'],
+      ['연예인 A, 탈세 의혹 보도', '소속사 부인에도 여론 악화'],
+      ['연예인 A, 방송 중 막말 논란', '시청자 항의 잇따라'],
+      ['연예인 A, 팬과의 갈등 노출', '공개 사과로 수습 시도'],
+      ['연예인 A, 스태프 폭언 의혹 제기', '촬영장 내 갑질 논란'],
+      ['연예인 A, 불법 주차 사진 논란', 'SNS에 공개되며 확산'],
+      ['연예인 A, 무단 광고 계약 위반 논란', '피해 업체 소송 검토'],
+      ['연예인 A, 연기력 논란 재점화', '신작에서 혹평 이어져'],
+      ['연예인 A, 뒷광고 사실 드러나', '진정성 논란 커져'],
+      ['연예인 A, SNS 허위사실 유포 의혹', '악성 루머 확산 우려']
+    ]
   }
 };
-let truePos = 0, trueNeg = 0, userPos = 0, userNeg = 0;
-const $ = id => document.getElementById(id);
-$('generate').onclick = generateFeed;
-$('result-btn').onclick = showResult;
+
+let userPos = 0, userNeg = 0, truePos = 0, trueNeg = 0;
+
+function $(id) {
+  return document.getElementById(id);
+}
 
 function generateFeed() {
   const topic = $('topic-select').value;
   const pool = FEEDS[topic];
-  const combined = [
-    ...pool.positive.map(([t, d]) => ({ title: t, desc: d, type: 'positive' })),
-    ...pool.negative.map(([t, d]) => ({ title: t, desc: d, type: 'negative' }))
-  ].sort(() => Math.random() - 0.5);
-  const list = combined.slice(0, 10);
-  truePos = list.filter(x => x.type === 'positive').length;
+  const mixed = [...pool.positive.map(x => ({ ...x, type: 'positive' })), ...pool.negative.map(x => ({ ...x, type: 'negative' }))];
+  mixed.sort(() => Math.random() - 0.5);
+  const picked = mixed.slice(0, 10);
+  truePos = picked.filter(x => x.type === 'positive').length;
   trueNeg = 10 - truePos;
+
+  const container = $('feed-container');
+  container.innerHTML = '';
   userPos = userNeg = 0;
-  const feed = $('feed');
-  feed.innerHTML = '';
-  list.forEach((item, idx) => {
-    const card = document.createElement('div');
-    card.className = 'feed-item';
-    card.dataset.state = 'none';
+
+  picked.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'feed-item';
+    div.dataset.state = 'none';
 
     const title = document.createElement('p');
-    title.textContent = `${idx + 1}. ${item.title}`;
+    title.textContent = ${i + 1}. ${item[0]};
+
     const desc = document.createElement('div');
     desc.className = 'subtext';
-    desc.textContent = item.desc;
+    desc.textContent = item[1];
 
-    const actions = document.createElement('div');
-    actions.className = 'tag-buttons';
-    ['긍정', '부정'].forEach(lbl => {
-      const btn = document.createElement('button');
-      btn.textContent = lbl;
-      btn.className = 'tag-button';
-      btn.onclick = () => tag(card, lbl === '긍정' ? 'positive' : 'negative');
-      actions.appendChild(btn);
+    const btns = document.createElement('div');
+    btns.className = 'tag-buttons';
+
+    ['긍정', '부정'].forEach(label => {
+      const b = document.createElement('button');
+      b.textContent = label;
+      b.className = 'tag-button';
+      b.onclick = () => mark(div, label === '긍정' ? 'positive' : 'negative');
+      btns.appendChild(b);
     });
 
-    card.appendChild(title);
-    card.appendChild(desc);
-    card.appendChild(actions);
-    feed.appendChild(card);
+    div.appendChild(title);
+    div.appendChild(desc);
+    div.appendChild(btns);
+    container.appendChild(div);
   });
+
   $('result-btn').classList.remove('hidden');
-  $('summary').classList.add('hidden');
-  $('explanation').classList.add('hidden');
-  $('survey').classList.add('hidden');
+  $('result-summary').classList.add('hidden');
 }
 
-function tag(card, state) {
-  const prev = card.dataset.state;
+function mark(div, state) {
+  const prev = div.dataset.state;
   if (prev === state) return;
-  if (prev === 'positive') userPos--; if (prev === 'negative') userNeg--;
+  if (prev === 'positive') userPos--;
+  if (prev === 'negative') userNeg--;
+
   if (state === 'positive') {
     userPos++;
-    card.classList.add('positive');
-    card.classList.remove('negative');
+    div.classList.add('positive');
+    div.classList.remove('negative');
   } else {
     userNeg++;
-    card.classList.add('negative');
-    card.classList.remove('positive');
+    div.classList.add('negative');
+    div.classList.remove('positive');
   }
-  card.dataset.state = state;
+  div.dataset.state = state;
 }
 
 function showResult() {
   if (userPos + userNeg < 10) {
-    alert('모든 기사에 라벨을 지정해주세요');
+    alert('모든 기사에 라벨을 선택해주세요.');
     return;
   }
-  $('real').textContent = `실제 비율: 긍정 ${truePos} / 부정 ${trueNeg}`;
-  $('user').textContent = `당신의 라벨: 긍정 ${userPos} / 부정 ${userNeg}`;
-  $('summary').classList.remove('hidden');
-  $('summary').scrollIntoView({ behavior: 'smooth' });
-}
-
-function showExplanation() {
-  $('explanation').classList.remove('hidden');
-  $('explanation').scrollIntoView({ behavior: 'smooth' });
-}
-
-function showSurvey() {
-  $('survey').classList.remove('hidden');
-  $('survey').scrollIntoView({ behavior: 'smooth' });
-}
-
-function submitSurvey() {
-  const feedback = $('thoughts').value.trim();
-  if (!feedback) {
-    alert('내용을 입력해주세요.');
-    return;
-  }
-  // 서버로 전송
-  fetch('https://your-server-endpoint.com/submit-feedback', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ feedback, topic: $('topic-select').value, userPos, userNeg, truePos, trueNeg })
-  })
-  .then(res => res.ok ? res.json() : Promise.reject(res.statusText))
-  .then(() => {
-    alert('제출이 완료되었습니다. 감사합니다!');
-    $('survey').innerHTML = '<h3>제출 감사합니다!</h3><p>여러분의 의견이 반영될 수 있도록 노력하겠습니다.</p>';
-  })
-  .catch(err => {
-    console.error('서버 전송 오류:', err);
-    alert('제출 중 오류가 발생했습니다. 다시 시도해주세요.');
-  });
+  $('real-ratio').textContent = 실제 비율: 긍정 ${truePos} / 부정 ${trueNeg};
+  $('user-ratio').textContent = 당신의 라벨: 긍정 ${userPos} / 부정 ${userNeg};
+  $('result-summary').classList.remove('hidden');
+  $('result-summary').scrollIntoView({ behavior: 'smooth' });
 }
 </script>
 </body>
