@@ -3,214 +3,183 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI 맞춤형 SNS (Mistral)</title>
+  <title>Bias Bubble 체험</title>
   <style>
-    :root {
-      --primary: #1da1f2;
-      --bg: #f5f8fa;
-      --card: #ffffff;
-      --border: #e6ecf0;
-      --text: #14171a;
-      --subtext: #657786;
+    /* ------ Color & Typography ------ */
+    :root{
+      --primary:#1d9bf0;   /* 버튼, 포인트 */
+      --primary-dark:#1574b9;
+      --bg:#f4f6f8;        /* 배경 */
+      --card:#ffffff;      /* 카드 */
+      --border:#e1e8ed;    /* 경계선 */
+      --text:#0f1419;      /* 본문 텍스트 */
+      --sub:#536471;       /* 서브 텍스트 */
+      --radius:16px;
+      --shadow:0 6px 16px rgba(0,0,0,.06);
     }
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background: var(--bg);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      padding-top: 40px;
-    }
-    #auth-section, #interest-section {
-      width: 100%;
-      max-width: 400px;
-      background: var(--card);
-      padding: 32px 40px;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.05);
-    }
-    #feed-section {
-      display: none;
-      width: 100%;
-      max-width: 600px;
-    }
-    h1, h2 {
-      text-align: center;
-      color: var(--text);
-    }
-    .input, .btn, #search-bar {
-      width: 100%;
-      padding: 12px 14px;
-      margin-top: 12px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 15px;
-    }
-    .btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 9999px;
-      cursor: pointer;
-    }
-    .btn:hover {
-      background: #0d8de1;
-    }
-    .tweet {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px 20px;
-      margin-bottom: 16px;
-    }
-    .tweet-user {
-      font-weight: bold;
-    }
-    .tweet-time {
-      font-size: 12px;
-      color: var(--subtext);
-    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+    body{background:var(--bg);display:flex;justify-content:center;padding:60px 16px}
+
+    /* ------ Layout Containers ------ */
+    .container{width:100%;max-width:680px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:32px 40px;margin-bottom:32px}
+    h1,h2,h3{color:var(--text);margin-bottom:24px;font-weight:700}
+    p{color:var(--sub);line-height:1.6;margin-bottom:16px;font-size:15px}
+
+    /* Form & Buttons */
+    .input,select{width:100%;padding:12px 14px;margin-top:8px;margin-bottom:20px;border:1px solid var(--border);border-radius:8px;font-size:15px;background:#fff}
+    .btn{display:inline-block;background:var(--primary);color:#fff;border:none;padding:12px 28px;border-radius:9999px;cursor:pointer;font-size:15px;font-weight:600;transition:.25s}
+    .btn:hover{background:var(--primary-dark)}
+
+    /* Feed */
+    .feed-item{border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px;background:#fff}
+    .feed-item strong{color:var(--text)}
+
+    /* Hidden sections control */
+    .hidden{display:none}
+    .fade{animation:fade .4s ease}
+    @keyframes fade{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
   </style>
 </head>
 <body>
+  <main class="container">
+    <!-- 1. Intro -->
+    <section id="intro" class="card fade">
+      <h1>내 피드는 편향되어 있을까?</h1>
+      <p>알고리즘 편향 · 필터버블 체험을 통해 당신에게 보여지는 정보의 한계를 경험해보세요.</p>
+      <button class="btn" onclick="showStep('select-topic')">체험 시작하기</button>
+    </section>
 
-  <section id="auth-section">
-    <h1 id="auth-title">로그인</h1>
-    <input id="auth-id" class="input" placeholder="아이디" />
-    <input id="auth-pw" class="input" type="password" placeholder="비밀번호" />
-    <button id="auth-btn" class="btn">로그인</button>
-    <p id="switch-msg" style="text-align: center; margin-top: 16px;">
-      계정이 없으신가요? <span id="switch-link" style="color: var(--primary); cursor: pointer;">회원가입</span>
-    </p>
-  </section>
+    <!-- 2. Topic + Viewpoint 선택 -->
+    <section id="select-topic" class="card hidden">
+      <h2>주제와 시각을 선택하세요</h2>
+      <label>주제
+        <select id="topic" class="input">
+          <option value="환경">환경</option>
+          <option value="AI">AI</option>
+          <option value="SNS">SNS</option>
+          <option value="연예인">연예인 A</option>
+        </select>
+      </label>
+      <label>시각
+        <select id="stance" class="input">
+          <option value="positive">긍정적 시각</option>
+          <option value="negative">부정적 시각</option>
+        </select>
+      </label>
+      <button class="btn" onclick="startFeed()">편향된 피드 보기</button>
+    </section>
 
-  <section id="interest-section" style="display:none;">
-    <h2>관심사를 입력하세요</h2>
-    <input id="interest-input" class="input" placeholder="예: 블록체인, 축구, K-드라마" />
-    <button id="interest-btn" class="btn">피드로 이동</button>
-  </section>
+    <!-- 3. Feed 체험 -->
+    <section id="feed" class="card hidden" style="padding-bottom:20px">
+      <h2 id="feed-title"></h2>
+      <div id="feed-items"></div>
+      <div style="text-align:center;margin-top:12px">
+        <button class="btn" onclick="togglePerspective()">다른 시각 보기</button>
+        <button class="btn" style="background:#ccc;color:#333" onclick="showStep('quiz')">다음 단계</button>
+      </div>
+    </section>
 
-  <section id="feed-section">
-    <input id="search-bar" class="input" placeholder="검색어를 입력하고 Enter" />
-    <div id="tweets"></div>
-  </section>
+    <!-- 4. 퀴즈 / 자가진단 -->
+    <section id="quiz" class="card hidden">
+      <h2>내 정보 소비 습관은?</h2>
+      <p>다음 중 가장 가까운 답을 선택하세요.</p>
+      <label><input type="radio" name="quiz" value="A"> 나와 생각이 다른 콘텐츠는 잘 보지 않는다.</label><br><br>
+      <label><input type="radio" name="quiz" value="B"> 다양한 출처를 일부러 찾는다.</label><br><br>
+      <label><input type="radio" name="quiz" value="C"> 알고리즘이 추천해주는 콘텐츠만 본다.</label><br><br>
+      <button class="btn" onclick="showStep('summary')">결과 보기</button>
+    </section>
 
-  <script>
-    let isLogin = true;
-    let userInterest = "";
+    <!-- 5. Summary & 교육 -->
+    <section id="summary" class="card hidden">
+      <h2>필터버블 · 확증편향이란?</h2>
+      <h3>필터버블(Filter Bubble)</h3>
+      <p>알고리즘이 당신의 선호에 맞춰 정보만 보여줘 다양한 시각을 차단합니다.</p>
+      <h3>확증편향(Confirmation Bias)</h3>
+      <p>사람은 본인이 믿는 정보만 받아들이고 반대 정보는 무시하려는 경향이 있습니다.</p>
+      <h3>왜 문제일까요?</h3>
+      <ul style="color:var(--sub);margin-left:16px">
+        <li>다양한 관점을 잃어 균형 잡힌 판단이 어려워집니다.</li>
+        <li>사회적 분열과 극단적 견해가 강화될 수 있습니다.</li>
+        <li>의사결정이 왜곡되어 개인·사회 모두에 악영향을 미칠 수 있습니다.</li>
+      </ul>
+      <h3>무엇을 할 수 있을까요?</h3>
+      <ul style="color:var(--sub);margin-left:16px">
+        <li>다양한 출처와 반대 시각의 정보도 확인하기</li>
+        <li>알고리즘 추천 설정·구독 채널 주기적으로 재점검</li>
+        <li>토론·대화로 시각 확장하기</li>
+      </ul>
+      <div style="text-align:center;margin-top:24px">
+        <button class="btn" onclick="location.reload()">다시 체험하기</button>
+      </div>
+    </section>
+  </main>
 
-    const authSection = document.getElementById("auth-section");
-    const authTitle = document.getElementById("auth-title");
-    const authBtn = document.getElementById("auth-btn");
-    const switchMsg = document.getElementById("switch-msg");
-    const authId = document.getElementById("auth-id");
-    const authPw = document.getElementById("auth-pw");
-    const interestSection = document.getElementById("interest-section");
-    const interestInput = document.getElementById("interest-input");
-    const interestBtn = document.getElementById("interest-btn");
-    const feedSection = document.getElementById("feed-section");
-    const tweetsDiv = document.getElementById("tweets");
-    const searchBar = document.getElementById("search-bar");
+<script>
+/* --------- 데이터 샘플 (오프라인) --------- */
+const DATA = {
+  환경:{
+    positive:[
+      "세계 각국 탄소 배출 10% 감소 성공!",
+      "친환경 에너지가 일자리 300만 개 창출",
+      "도시 곳곳에 미세먼지 30% 줄어든 녹색 벨트"],
+    negative:[
+      "올여름 사상 최악의 폭염 경보",
+      "빙하 소멸 속도 가속… 해수면 상승 비상",
+      "정부 기후 정책 미흡, 국제 비난 확산"]
+  },
+  AI:{
+    positive:[
+      "AI 의료 진단 정확도 95% 돌파",
+      "스마트 팩토리 덕분에 생산 효율 2배↑",
+      "AI 번역으로 글로벌 소통 장벽 해소"],
+    negative:[
+      "AI로 인한 일자리 30만 개 위협",
+      "대화형 AI가 허위 정보 전파 논란",
+      "감시 기술 남용으로 프라이버시 우려"]
+  },
+  SNS:{
+    positive:[
+      "SNS 캠페인으로 기부금 1억 모금 성공",
+      "팬 커뮤니티 힘으로 소상공인 매출 급증",
+      "재난 시 실시간 소통으로 생존율 향상"],
+    negative:[
+      "SNS 중독, 청소년 우울증 2배 증가",
+      "가짜 뉴스 확산 속도, 언론보다 6배 빨라",
+      "혐오 발언 필터링 미흡으로 사용자 불안"]
+  },
+  연예인:{
+    positive:["연예인 A, 국제 시상식 대상 수상!","음악 차트 올킬, 글로벌 팬덤 열광","선행 활동으로 기부 천만 달러 돌파"],
+    negative:["연예인 A, 탈세 의혹 논란","과거 SNS 막말 재점화","스케줄 파행에 팬들 실망"]
+  }
+};
 
-    function refreshAuthText() {
-      authTitle.textContent = isLogin ? "로그인" : "회원가입";
-      authBtn.textContent = isLogin ? "로그인" : "회원가입";
-      switchMsg.innerHTML = isLogin
-        ? '계정이 없으신가요? <span id="switch-link" style="color: var(--primary); cursor: pointer;">회원가입</span>'
-        : '이미 계정이 있으신가요? <span id="switch-link" style="color: var(--primary); cursor: pointer;">로그인</span>';
-      document.getElementById("switch-link").addEventListener("click", () => {
-        isLogin = !isLogin;
-        refreshAuthText();
-      });
-    }
-
-    document.getElementById("switch-link").addEventListener("click", () => {
-      isLogin = !isLogin;
-      refreshAuthText();
-    });
-
-    authBtn.addEventListener("click", () => {
-      const id = authId.value.trim();
-      const pw = authPw.value.trim();
-      if (!id || !pw) {
-        alert("아이디와 비밀번호를 입력하세요.");
-        return;
-      }
-      alert(`${id} 님, ${isLogin ? "로그인" : "회원가입"}이 완료되었습니다.`);
-      authSection.style.display = "none";
-      interestSection.style.display = "block";
-    });
-
-    interestBtn.addEventListener("click", () => {
-      const interest = interestInput.value.trim();
-      if (!interest) {
-        alert("관심사를 입력해주세요.");
-        return;
-      }
-      userInterest = interest;
-      interestSection.style.display = "none";
-      feedSection.style.display = "block";
-      tweetsDiv.innerHTML = "";
-      postTweet(userInterest);
-    });
-
-    searchBar.addEventListener("keyup", (e) => {
-      if (e.key === "Enter") {
-        const query = searchBar.value.trim();
-        if (query) {
-          postTweet(query, true);
-          searchBar.value = "";
-        }
-      }
-    });
-
-    const HF_KEY = "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";
-    const MODEL_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1";
-
-    async function callModel(prompt) {
-      try {
-        const response = await fetch(MODEL_URL, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${HF_KEY}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ inputs: prompt })
-        });
-
-        if (!response.ok) {
-          console.error("모델 호출 실패", response.status);
-          return "[모델 호출 오류]";
-        }
-
-        const data = await response.json();
-        return data[0]?.generated_text || "[응답 없음]";
-      } catch (error) {
-        console.error("예외 발생:", error);
-        return "[예외 오류 발생]";
-      }
-    }
-
-    async function postTweet(topic, prepend = false) {
-      const el = document.createElement("div");
-      el.className = "tweet";
-      el.innerHTML = `
-        <p class="tweet-user">AI 뉴스</p>
-        <p class="tweet-content">생성 중...</p>
-        <p class="tweet-time">방금</p>
-      `;
-      prepend ? tweetsDiv.prepend(el) : tweetsDiv.appendChild(el);
-
-      const prompt = `${topic}에 대해 자극적인 소셜미디어 뉴스 게시글을 한국어로 2문장 이내로 써줘.`;
-      const result = await callModel(prompt);
-      el.querySelector(".tweet-content").textContent = result;
-    }
-  </script>
-</body>
+/* --------- UI 제어 함수 --------- */
+function showStep(id){
+  document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'));
+  const el=document.getElementById(id);
+  if(el){el.classList.remove('hidden');el.classList.add('fade');}
+}
+function startFeed(){
+  const topic=document.getElementById('topic')?.value||'환경';
+  const stance=document.getElementById('stance')?.value||'positive';
+  window.currentTopic=topic;window.currentStance=stance;
+  renderFeed();
+  showStep('feed');
+}
+function renderFeed(){
+  const list=DATA[window.currentTopic][window.currentStance];
+  const title=document.getElementById('feed-title')||document.createElement('h2');
+  title.id='feed-title';title.textContent=`${window.currentTopic} • ${window.currentStance==='positive'?'긍정':'부정'} 시각`;
+  const feed=document.getElementById('feed-items');feed.innerHTML='';
+  list.forEach(txt=>{
+    const item=document.createElement('div');item.className='feed-item';item.innerHTML=`<strong>${window.currentTopic}</strong><p>${txt}</p>`;feed.appendChild(item);
+  })
+  document.getElementById('feed').insertBefore(title,feed);
+}
+function togglePerspective(){
+  window.currentStance=window.currentStance==='positive'?'negative':'positive';
+  renderFeed();
+}
+</script>
 </html>
