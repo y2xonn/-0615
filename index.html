@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI 맞춤형 SNS (무료 모델)</title>
+  <title>AI 맞춤형 SNS (Mistral)</title>
   <style>
     :root {
       --primary: #1da1f2;
@@ -171,7 +171,7 @@
     });
 
     const HF_KEY = "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";
-    const MODEL_URL = "https://api-inference.huggingface.co/models/tiiuae/falcon-rw-1b";
+    const MODEL_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1";
 
     async function callModel(prompt) {
       try {
@@ -207,7 +207,7 @@
       `;
       prepend ? tweetsDiv.prepend(el) : tweetsDiv.appendChild(el);
 
-      const prompt = `${topic}에 대해 한국어로 자극적인 뉴스 제목을 1~2문장으로 작성해줘.`;
+      const prompt = `${topic}에 대해 자극적인 소셜미디어 뉴스 게시글을 한국어로 2문장 이내로 써줘.`;
       const result = await callModel(prompt);
       el.querySelector(".tweet-content").textContent = result;
     }
