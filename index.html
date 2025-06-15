@@ -11,13 +11,14 @@
     h1,h2{margin-bottom:24px}
     select,button{padding:10px;font-size:15px;border:1px solid var(--border);border-radius:6px}
     button.generate{background:var(--primary);color:#fff;border:none;cursor:pointer;margin-left:8px}
-    .feed-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px}
-    .tag-buttons{margin-top:12px}
-    .tag-button{padding:6px 14px;margin-right:8px;border:1px solid var(--border);border-radius:6px;cursor:pointer}
+    .feed-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;position:relative}
+    .tag-buttons{position:absolute;top:20px;right:20px}
+    .tag-button{padding:6px 14px;margin-left:8px;border:1px solid var(--border);border-radius:6px;cursor:pointer}
     .positive{background:var(--pos)!important}
     .negative{background:var(--neg)!important}
     .hidden{display:none}
     .card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:24px;margin-top:32px}
+    .subtext{font-size:13px;color:#666;margin-top:6px}
   </style>
 </head>
 <body>
@@ -53,9 +54,75 @@ const FEEDS={
   연예인:{positive:["연예인 A, 국제 시상식 대상 수상","팬미팅 성료, 글로벌 팬 사랑 확인","선행 활동으로 기부 5억 돌파","새 음원 발매 하루 만에 1위","해외 투어 전석 매진"],negative:["연예인 A, 탈세 의혹 파문","과거 발언 논란 재점화","스케줄 파행에 팬들 실망","소속사와 갈등 심화","음주 운전 적발로 활동 중단"]}
 };
 let numPos=0,numNeg=0,userPos=0,userNeg=0;
-function generateFeed(){const topic=document.getElementById('topic-select').value;const feedData=FEEDS[topic];const container=document.getElementById('feed-container');container.innerHTML='';userPos=userNeg=0;const total=10;numPos=Math.floor(Math.random()*(total+1));numNeg=total-numPos;let pos=[...feedData.positive],neg=[...feedData.negative];while(pos.length<numPos)pos=pos.concat(feedData.positive);while(neg.length<numNeg)neg=neg.concat(feedData.negative);const mixed=[...pos.slice(0,numPos),...neg.slice(0,numNeg)].sort(()=>Math.random()-.5);mixed.forEach((txt,i)=>{const div=document.createElement('div');div.className='feed-item';div.dataset.state='none';const p=document.createElement('p');p.textContent=txt;const btnWrap=document.createElement('div');btnWrap.className='tag-buttons';['긍정','부정'].forEach(l=>{const b=document.createElement('button');b.textContent=l;b.className='tag-button';b.onclick=()=>mark(div,l==='긍정'?'positive':'negative');btnWrap.appendChild(b);});div.appendChild(p);div.appendChild(btnWrap);container.appendChild(div);});document.getElementById('result-btn').classList.remove('hidden');document.getElementById('summary').classList.add('hidden');}
-function mark(div,state){const prev=div.dataset.state;if(prev===state)return;if(prev==='positive')userPos--;if(prev==='negative')userNeg--;if(state==='positive'){userPos++;div.classList.add('positive');div.classList.remove('negative');}else{userNeg++;div.classList.add('negative');div.classList.remove('positive');}div.dataset.state=state;}
-function showResult(){document.getElementById('actual-ratio').textContent=`실제 비율: 긍정 ${numPos} / 부정 ${numNeg}`;document.getElementById('user-ratio').textContent=`당신의 선택: 긍정 ${userPos} / 부정 ${userNeg}`;document.getElementById('summary').classList.remove('hidden');window.scrollTo({top:document.getElementById('summary').offsetTop,behavior:'smooth'});} 
+function generateFeed(){
+  const topic=document.getElementById('topic-select').value;
+  const feedData=FEEDS[topic];
+  const container=document.getElementById('feed-container');
+  container.innerHTML='';
+  userPos=userNeg=0;
+  const total=10;
+  numPos=Math.floor(Math.random()*(total+1));
+  numNeg=total-numPos;
+  let pos=[...feedData.positive],neg=[...feedData.negative];
+  while(pos.length<numPos)pos=pos.concat(feedData.positive);
+  while(neg.length<numNeg)neg=neg.concat(feedData.negative);
+  const mixed=[...pos.slice(0,numPos),...neg.slice(0,numNeg)].sort(()=>Math.random()-.5);
+  mixed.forEach((txt,i)=>{
+    const div=document.createElement('div');
+    div.className='feed-item';
+    div.dataset.state='none';
+
+    const p=document.createElement('p');
+    p.textContent=txt;
+
+    const sub=document.createElement('div');
+    sub.className='subtext';
+    sub.textContent='이 뉴스는 요약 정보 또는 추가 설명이 여기에 표시됩니다.';
+
+    const btnWrap=document.createElement('div');
+    btnWrap.className='tag-buttons';
+    ['긍정','부정'].forEach(l=>{
+      const b=document.createElement('button');
+      b.textContent=l;
+      b.className='tag-button';
+      b.onclick=()=>mark(div,l==='긍정'?'positive':'negative');
+      btnWrap.appendChild(b);
+    });
+
+    div.appendChild(p);
+    div.appendChild(sub);
+    div.appendChild(btnWrap);
+    container.appendChild(div);
+  });
+  document.getElementById('result-btn').classList.remove('hidden');
+  document.getElementById('summary').classList.add('hidden');
+}
+function mark(div,state){
+  const prev=div.dataset.state;
+  if(prev===state)return;
+  if(prev==='positive')userPos--;
+  if(prev==='negative')userNeg--;
+  if(state==='positive'){
+    userPos++;
+    div.classList.add('positive');
+    div.classList.remove('negative');
+  }else{
+    userNeg++;
+    div.classList.add('negative');
+    div.classList.remove('positive');
+  }
+  div.dataset.state=state;
+}
+function showResult(){
+  const totalTagged=userPos+userNeg;
+  if(totalTagged<10){
+    alert(`10개 중 ${10-totalTagged}개 기사에 아직 선택이 안 되어 있어요!`);
+  }
+  document.getElementById('actual-ratio').textContent=`실제 비율: 긍정 ${numPos} / 부정 ${numNeg}`;
+  document.getElementById('user-ratio').textContent=`당신의 선택: 긍정 ${userPos} / 부정 ${userNeg}`;
+  document.getElementById('summary').classList.remove('hidden');
+  window.scrollTo({top:document.getElementById('summary').offsetTop,behavior:'smooth'});
+}
 </script>
 </body>
 </html>
