@@ -72,7 +72,6 @@
   </style>
 </head>
 <body>
-  <!-- 로그인/회원가입 박스 -->
   <section id="auth-section">
     <h1 id="auth-title">로그인</h1>
     <input id="auth-id" class="input" type="text" placeholder="아이디" />
@@ -83,25 +82,21 @@
     </p>
   </section>
 
-  <!-- 관심사 입력 박스 -->
   <section id="interest-section" style="display:none;">
     <h2>관심사를 입력하세요</h2>
     <input id="interest-input" class="input" type="text" placeholder="예: 블록체인, 축구, K-드라마" />
     <button id="interest-btn" class="btn">피드로 이동</button>
   </section>
 
-  <!-- 트위터 스타일 피드 -->
   <section id="feed-section">
     <input id="search-bar" type="text" placeholder="검색어를 입력하고 Enter" />
     <div id="tweets"></div>
   </section>
 
   <script>
-    // ===== 상태 변수 =====
     let isLoginMode = true;
     let userInterest = "";
 
-    // ===== 요소 캐싱 =====
     const authSection     = document.getElementById("auth-section");
     const authTitle       = document.getElementById("auth-title");
     const authBtn         = document.getElementById("auth-btn");
@@ -118,7 +113,6 @@
     const tweetsDiv       = document.getElementById("tweets");
     const searchBar       = document.getElementById("search-bar");
 
-    // ===== 로그인/회원가입 토글 =====
     function updateAuthBox() {
       authTitle.textContent = isLoginMode ? "로그인" : "회원가입";
       authBtn.textContent   = isLoginMode ? "로그인" : "회원가입";
@@ -126,7 +120,6 @@
         ? "계정이 없으신가요? <span id='switch-link' style='color: var(--primary); cursor: pointer;'>회원가입</span>"
         : "이미 계정이 있으신가요? <span id='switch-link' style='color: var(--primary); cursor: pointer;'>로그인</span>";
 
-      // 새롭게 삽입된 링크에 이벤트 재연결
       switchLink = document.getElementById("switch-link");
       switchLink.addEventListener("click", toggleAuthMode);
     }
@@ -136,10 +129,8 @@
       updateAuthBox();
     }
 
-    // 최초 이벤트 연결
     switchLink.addEventListener("click", toggleAuthMode);
 
-    // ===== 로그인/회원가입 버튼 =====
     authBtn.addEventListener("click", () => {
       const id = authId.value.trim();
       const pw = authPw.value.trim();
@@ -152,7 +143,6 @@
       interestSection.style.display = "block";
     });
 
-    // ===== 관심사 입력 완료 =====
     interestBtn.addEventListener("click", () => {
       const interest = interestInput.value.trim();
       if (!interest) {
@@ -166,7 +156,6 @@
       generateTweet(userInterest);
     });
 
-    // ===== 검색창 Enter =====
     searchBar.addEventListener("keyup", (e) => {
       if (e.key === "Enter") {
         const query = searchBar.value.trim();
@@ -177,7 +166,6 @@
       }
     });
 
-    // ===== OpenAI 호출 =====
     async function fetchFromOpenAI(prompt) {
       try {
         const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -189,22 +177,35 @@
           body: JSON.stringify({
             model: "gpt-3.5-turbo",
             messages: [
-              { role: "system", content: "너는 익살스럽고 자극적인 가짜 뉴스를 작성하는 기자야. 너무 극단적이거나 혐오적 표현은 피하되, 클릭을 유도할 만한 선정적·과장된 표현을 사용해. 문장은 2~3문장으로 짧게." },
-              { role: "user", content: prompt }
+              {
+                role: "system",
+                content: "너는 익살스럽고 자극적인 가짜 뉴스를 작성하는 기자야. 너무 극단적이거나 혐오적 표현은 피하되, 클릭을 유도할 만한 선정적·과장된 표현을 사용해. 문장은 2~3문장으로 짧게."
+              },
+              {
+                role: "user",
+                content: prompt
+              }
             ],
             max_tokens: 120,
             temperature: 0.9
           })
         });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("OpenAI API Error:", errorText);
+          return "[AI 호출 오류]";
+        }
+
         const data = await response.json();
+        console.log("OpenAI 응답 데이터:", data);
         return data.choices?.[0]?.message?.content || "[AI 생성 실패]";
       } catch (err) {
-        console.error("OpenAI Error", err);
+        console.error("예외 발생:", err);
         return "[AI 호출 오류]";
       }
     }
 
-    // ===== 트윗 생성 =====
     async function generateTweet(topic, isSearch = false) {
       const tweetEl = document.createElement("div");
       tweetEl.className = "tweet";
