@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -8,7 +8,7 @@
     body {font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 24px; display: flex; justify-content: center;}
     .container {width: 100%; max-width: 780px;}
     h1, h2 {margin-bottom: 20px; color: #333;}
-    select, button {padding: 10px; font-size: 15px; border: 1px solid #ccc; border-radius: 6px;}
+    select, button, textarea {padding: 10px; font-size: 15px; border: 1px solid #ccc; border-radius: 6px;}
     button.action {background: #1d9bf0; color: #fff; border: none; cursor: pointer; margin-left: 8px;}
     .feed-item {background: #fff; border: 1px solid #ccc; border-radius: 10px; padding: 18px; margin-bottom: 14px; position: relative;}
     .subtext {font-size: 13px; color: #666; margin-top: 6px;}
@@ -17,6 +17,7 @@
     .positive {background: #d4edda !important;}
     .negative {background: #f8d7da !important;}
     .hidden {display: none;}
+    .explain, .survey {background: #fff; border: 1px solid #ccc; border-radius: 10px; padding: 20px; margin-top: 30px;}
   </style>
 </head>
 <body>
@@ -32,10 +33,31 @@
 
     <div id="feed"></div>
     <button id="result-btn" class="action hidden">결과 보기</button>
+
     <div id="summary" class="hidden">
       <h2>결과 요약</h2>
       <p id="real"></p>
       <p id="user"></p>
+      <button onclick="showExplanation()" class="action">다음으로</button>
+    </div>
+
+    <div id="explanation" class="explain hidden">
+      <h2>필터버블과 알고리즘 편향이란?</h2>
+      <p>필터버블은 알고리즘이 사용자의 관심사에 맞춘 콘텐츠만 보여줘서 다양한 시각을 접하기 어렵게 만드는 현상입니다. 알고리즘 편향은 특정 방향의 정보만 더 자주 노출되는 현상으로, 사용자 인식에 영향을 줄 수 있습니다.</p>
+      <h3>이런 문제를 해결하려면?</h3>
+      <ul>
+        <li>다양한 출처에서 정보를 확인하기</li>
+        <li>자신과 다른 시각도 고려하기</li>
+        <li>자동 추천에만 의존하지 않기</li>
+      </ul>
+      <button onclick="showSurvey()" class="action">설문 참여하기</button>
+    </div>
+
+    <div id="survey" class="survey hidden">
+      <h2>체험 피드백</h2>
+      <label for="thoughts">이번 체험에서 느낀 점을 자유롭게 적어주세요:</label><br/>
+      <textarea id="thoughts" rows="5" style="width: 100%; margin-top: 10px;"></textarea><br/>
+      <button onclick="submitSurvey()" class="action">제출</button>
     </div>
   </div>
 
@@ -100,6 +122,8 @@ function generateFeed() {
   });
   $('result-btn').classList.remove('hidden');
   $('summary').classList.add('hidden');
+  $('explanation').classList.add('hidden');
+  $('survey').classList.add('hidden');
 }
 
 function tag(card, state) {
@@ -117,6 +141,7 @@ function tag(card, state) {
   }
   card.dataset.state = state;
 }
+
 function showResult() {
   if (userPos + userNeg < 10) {
     alert('모든 기사에 라벨을 지정해주세요');
@@ -126,6 +151,39 @@ function showResult() {
   $('user').textContent = `당신의 라벨: 긍정 ${userPos} / 부정 ${userNeg}`;
   $('summary').classList.remove('hidden');
   $('summary').scrollIntoView({ behavior: 'smooth' });
+}
+
+function showExplanation() {
+  $('explanation').classList.remove('hidden');
+  $('explanation').scrollIntoView({ behavior: 'smooth' });
+}
+
+function showSurvey() {
+  $('survey').classList.remove('hidden');
+  $('survey').scrollIntoView({ behavior: 'smooth' });
+}
+
+function submitSurvey() {
+  const feedback = $('thoughts').value.trim();
+  if (!feedback) {
+    alert('내용을 입력해주세요.');
+    return;
+  }
+  // 서버로 전송
+  fetch('https://your-server-endpoint.com/submit-feedback', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ feedback, topic: $('topic-select').value, userPos, userNeg, truePos, trueNeg })
+  })
+  .then(res => res.ok ? res.json() : Promise.reject(res.statusText))
+  .then(() => {
+    alert('제출이 완료되었습니다. 감사합니다!');
+    $('survey').innerHTML = '<h3>제출 감사합니다!</h3><p>여러분의 의견이 반영될 수 있도록 노력하겠습니다.</p>';
+  })
+  .catch(err => {
+    console.error('서버 전송 오류:', err);
+    alert('제출 중 오류가 발생했습니다. 다시 시도해주세요.');
+  });
 }
 </script>
 </body>
