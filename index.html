@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bias Bubble 체험</title>
+  <title>편향 피드 체험</title>
   <style>
     :root {
       --primary: #1d9bf0;
-      --primary-dark: #1574b9;
       --bg: #f4f6f8;
       --card: #ffffff;
       --border: #e1e8ed;
@@ -51,16 +50,6 @@
       margin-bottom: 16px;
       font-size: 15px;
     }
-    .input, select {
-      width: 100%;
-      padding: 12px 14px;
-      margin-top: 8px;
-      margin-bottom: 20px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 15px;
-      background: #fff;
-    }
     .btn {
       display: inline-block;
       background: var(--primary);
@@ -72,9 +61,10 @@
       font-size: 15px;
       font-weight: 600;
       transition: 0.25s;
+      margin-top: 12px;
     }
     .btn:hover {
-      background: var(--primary-dark);
+      background: #1478c9;
     }
     .feed-item {
       border: 1px solid var(--border);
@@ -83,179 +73,139 @@
       margin-bottom: 20px;
       background: #fff;
     }
-    .feed-item strong {
-      color: var(--text);
-    }
-    .hidden {
-      display: none;
-    }
-    .fade {
-      animation: fade 0.4s ease;
-    }
-    @keyframes fade {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .hidden { display: none; }
+    textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
     }
   </style>
 </head>
 <body>
   <main class="container">
-    <section id="intro" class="card fade">
+    <section id="intro" class="card">
       <h1>내 피드는 편향되어 있을까?</h1>
-      <p>알고리즘 편향 · 필터버블 체험을 통해 당신에게 보여지는 정보의 한계를 경험해보세요.</p>
-      <button class="btn" onclick="showStep('select-topic')">체험 시작하기</button>
+      <p>정보 비율의 왜곡이 어떻게 인식에 영향을 줄까요?</p>
+      <button class="btn" onclick="showStep('choose')">체험 시작</button>
     </section>
 
-    <section id="select-topic" class="card hidden">
-      <h2>주제와 시각을 선택하세요</h2>
-      <label>주제
-        <select id="topic" class="input">
-          <option value="환경">환경</option>
-          <option value="AI">AI</option>
-          <option value="SNS">SNS</option>
-          <option value="연예인">연예인 A</option>
-        </select>
-      </label>
-      <label>시각
-        <select id="stance" class="input">
-          <option value="positive">긍정적 시각</option>
-          <option value="negative">부정적 시각</option>
-        </select>
-      </label>
-      <button class="btn" onclick="startFeed()">편향된 피드 보기</button>
+    <section id="choose" class="card hidden">
+      <h2>주제를 선택하세요</h2>
+      <select id="topic-select">
+        <option value="환경">환경</option>
+        <option value="AI">AI</option>
+        <option value="SNS">SNS</option>
+      </select>
+      <button class="btn" onclick="startFeed()">피드 보기</button>
     </section>
 
     <section id="feed" class="card hidden">
-      <h2 id="feed-title"></h2>
+      <h2>당신을 위한 피드</h2>
       <div id="feed-items"></div>
-      <div style="text-align:center;margin-top:12px">
-        <button class="btn" onclick="togglePerspective()">다른 시각 보기</button>
-        <button class="btn" style="background:#ccc;color:#333" onclick="showStep('diagnosis')">다음 단계</button>
-      </div>
+      <button class="btn" onclick="showStep('survey')">설문 진행</button>
     </section>
 
-    <section id="diagnosis" class="card hidden">
-      <h2>당신이 본 피드는 어떤 경향이 있었나요?</h2>
-      <p>피드의 경향을 스스로 진단해 보세요.</p>
-      <label><strong>1. 피드는 어느 쪽으로 치우쳐 있다고 느꼈나요?</strong></label>
-      <select id="bias-feeling" class="input">
-        <option value="positive">긍정적인 방향</option>
-        <option value="negative">부정적인 방향</option>
-        <option value="mixed">양쪽 다 있었음</option>
-        <option value="unclear">잘 모르겠음</option>
+    <section id="survey" class="card hidden">
+      <h2>이 피드는 어떤 방향으로 치우쳐 있었나요?</h2>
+      <select id="bias-answer">
+        <option value="positive">긍정적</option>
+        <option value="negative">부정적</option>
+        <option value="balanced">균형적</option>
+        <option value="unsure">잘 모르겠음</option>
       </select>
-
-      <label><strong>2. 그렇게 느낀 이유는 무엇인가요?</strong></label>
-      <textarea class="input" id="bias-reason" rows="4" placeholder="예: 기사 제목이 대부분 위협적인 어조였어요."></textarea>
-      <button class="btn" onclick="showStep('quiz')">결과 제출 후 다음 단계</button>
-    </section>
-
-    <section id="quiz" class="card hidden">
-      <h2>내 정보 소비 습관은?</h2>
-      <p>다음 중 가장 가까운 답을 선택하세요.</p>
-      <label><input type="radio" name="quiz" value="A"> 나와 생각이 다른 콘텐츠는 잘 보지 않는다.</label><br><br>
-      <label><input type="radio" name="quiz" value="B"> 다양한 출처를 일부러 찾는다.</label><br><br>
-      <label><input type="radio" name="quiz" value="C"> 알고리즘이 추천해주는 콘텐츠만 본다.</label><br><br>
+      <p>이유를 간단히 적어주세요:</p>
+      <textarea rows="4" id="bias-reason" placeholder="예: 대부분 부정적인 내용이 많았어요."></textarea>
       <button class="btn" onclick="showStep('summary')">결과 보기</button>
     </section>
 
     <section id="summary" class="card hidden">
-      <h2>필터버블 · 확증편향이란?</h2>
-      <h3>필터버블(Filter Bubble)</h3>
-      <p>알고리즘이 당신의 선호에 맞춰 정보만 보여줘 다양한 시각을 차단합니다.</p>
-      <h3>확증편향(Confirmation Bias)</h3>
-      <p>사람은 본인이 믿는 정보만 받아들이고 반대 정보는 무시하려는 경향이 있습니다.</p>
-      <h3>왜 문제일까요?</h3>
-      <ul style="color:var(--sub);margin-left:16px">
-        <li>다양한 관점을 잃어 균형 잡힌 판단이 어려워집니다.</li>
-        <li>사회적 분열과 극단적 견해가 강화될 수 있습니다.</li>
-        <li>의사결정이 왜곡되어 개인·사회 모두에 악영향을 미칠 수 있습니다.</li>
+      <h2>실제 피드 구성</h2>
+      <p id="actual-ratio"></p>
+      <p>알고리즘이 특정 비율로 정보를 제공하면, 우리의 인식은 쉽게 편향될 수 있습니다.</p>
+      <h3>필터버블 & 확증편향이란?</h3>
+      <ul>
+        <li><strong>필터버블</strong>: 알고리즘이 선호에 맞는 정보만 제공</li>
+        <li><strong>확증편향</strong>: 보고 싶은 정보만 받아들이려는 심리</li>
       </ul>
-      <h3>무엇을 할 수 있을까요?</h3>
-      <ul style="color:var(--sub);margin-left:16px">
-        <li>다양한 출처와 반대 시각의 정보도 확인하기</li>
-        <li>알고리즘 추천 설정·구독 채널 주기적으로 재점검</li>
-        <li>토론·대화로 시각 확장하기</li>
-      </ul>
-      <div style="text-align:center;margin-top:24px">
-        <button class="btn" onclick="location.reload()">다시 체험하기</button>
-      </div>
+      <p>균형 잡힌 정보 소비를 위해 다양한 출처와 관점을 접해보세요.</p>
+      <button class="btn" onclick="location.reload()">처음으로</button>
     </section>
   </main>
 
-<script>
-const DATA = {
-  환경: {
-    positive: ["세계 각국 탄소 배출 10% 감소 성공!","친환경 에너지가 일자리 300만 개 창출","도시 곳곳에 미세먼지 30% 줄어든 녹색 벨트"],
-    negative: ["올여름 사상 최악의 폭염 경보","빙하 소멸 속도 가속… 해수면 상승 비상","정부 기후 정책 미흡, 국제 비난 확산"]
-  },
-  AI: {
-    positive: ["AI 의료 진단 정확도 95% 돌파","스마트 팩토리 덕분에 생산 효율 2배↑","AI 번역으로 글로벌 소통 장벽 해소"],
-    negative: ["AI로 인한 일자리 30만 개 위협","대화형 AI가 허위 정보 전파 논란","감시 기술 남용으로 프라이버시 우려"]
-  },
-  SNS: {
-    positive: ["SNS 캠페인으로 기부금 1억 모금 성공","팬 커뮤니티 힘으로 소상공인 매출 급증","재난 시 실시간 소통으로 생존율 향상"],
-    negative: ["SNS 중독, 청소년 우울증 2배 증가","가짜 뉴스 확산 속도, 언론보다 6배 빨라","혐오 발언 필터링 미흡으로 사용자 불안"]
-  },
-  연예인: {
-    positive: ["연예인 A, 국제 시상식 대상 수상!","음악 차트 올킬, 글로벌 팬덤 열광","선행 활동으로 기부 천만 달러 돌파"],
-    negative: ["연예인 A, 탈세 의혹 논란","과거 SNS 막말 재점화","스케줄 파행에 팬들 실망"]
-  }
-};
+  <script>
+    const FEEDS = {
+      환경: {
+        positive: [
+          "전 세계 탄소 배출 감소, 녹색 전환 가속화",
+          "친환경 기술 투자 증가로 일자리 창출"
+        ],
+        negative: [
+          "폭염으로 사망자 급증, 기후 위기 현실로",
+          "산불 증가, 환경 파괴 가속"
+        ]
+      },
+      AI: {
+        positive: [
+          "AI로 질병 진단 정확도 향상",
+          "AI 덕분에 생산성 대폭 증가"
+        ],
+        negative: [
+          "AI로 일자리 대량 소멸 위기",
+          "딥페이크로 허위정보 범람"
+        ]
+      },
+      SNS: {
+        positive: [
+          "SNS 캠페인으로 기부금 10억 모금",
+          "소통의 창으로 재난 시 생명 구조 도움"
+        ],
+        negative: [
+          "SNS 중독으로 청소년 정신건강 악화",
+          "허위 정보 확산, 사회 갈등 심화"
+        ]
+      }
+    };
 
-function showStep(id) {
-  document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-  const el = document.getElementById(id);
-  if (el) {
-    el.classList.remove('hidden');
-    el.classList.add('fade');
-  }
-}
+    function showStep(id) {
+      document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    }
 
-function startFeed() {
-  const topic = document.getElementById('topic')?.value || '환경';
-  const stance = document.getElementById('stance')?.value || 'positive';
-  window.currentTopic = topic;
-  window.currentStance = stance;
-  renderFeed();
-  showStep('feed');
-}
+    function startFeed() {
+      const topic = document.getElementById("topic-select").value;
+      const feed = FEEDS[topic];
+      const container = document.getElementById("feed-items");
+      container.innerHTML = '';
 
-function renderFeed() {
-  const title = document.getElementById('feed-title');
-  const feed = document.getElementById('feed-items');
-  title.textContent = `${window.currentTopic} • ${window.currentStance === 'positive' ? '긍정' : '부정'} 시각`;
-  feed.innerHTML = '';
+      // 랜덤 비율 결정 (6:4 이상 유지)
+      const positiveRatio = Math.random() < 0.5 ? 0.4 : 0.6;
+      const negativeRatio = 1 - positiveRatio;
 
-  let items = [];
-  if (window.currentStance === 'mixed') {
-    const pos = DATA[window.currentTopic].positive;
-    const neg = DATA[window.currentTopic].negative;
-    items = [...pos.slice(0, 2), ...neg.slice(0, 2)].sort(() => Math.random() - 0.5);
-  } else {
-    items = DATA[window.currentTopic][window.currentStance];
-  }
+      const totalItems = 5;
+      const numPositive = Math.round(totalItems * positiveRatio);
+      const numNegative = totalItems - numPositive;
 
-  items.forEach(txt => {
-    const item = document.createElement('div');
-    item.className = 'feed-item';
-    item.innerHTML = `<strong>${window.currentTopic}</strong><p>${txt}</p>`;
-    feed.appendChild(item);
-  });
-}
+      const positiveItems = feed.positive.slice(0, numPositive);
+      const negativeItems = feed.negative.slice(0, numNegative);
 
-function togglePerspective() {
-  if (window.currentStance === 'positive') window.currentStance = 'negative';
-  else if (window.currentStance === 'negative') window.currentStance = 'mixed';
-  else window.currentStance = 'positive';
-  renderFeed();
-}
-</script>
+      const mixed = [...positiveItems, ...negativeItems];
+      mixed.sort(() => Math.random() - 0.5);
+
+      mixed.forEach(text => {
+        const div = document.createElement("div");
+        div.className = "feed-item";
+        div.textContent = text;
+        container.appendChild(div);
+      });
+
+      // 비율 정보 저장 (설명용)
+      const actual = document.getElementById("actual-ratio");
+      actual.textContent = `이번 피드는 실제로 긍정 뉴스 ${numPositive}, 부정 뉴스 ${numNegative}개로 구성되어 있었습니다.`;
+
+      showStep("feed");
+    }
+  </script>
 </body>
 </html>
